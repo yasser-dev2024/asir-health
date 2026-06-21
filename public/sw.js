@@ -1,10 +1,11 @@
 const CACHE_NAME = 'saif-seha-musaed-v1';
+const BASE_URL = self.registration.scope;
 const CORE_ASSETS = [
-  '/',
-  '/manifest.webmanifest',
-  '/favicon.svg',
-  '/maskable-icon.svg'
-];
+  '',
+  'manifest.webmanifest',
+  'favicon.svg',
+  'maskable-icon.svg'
+].map((asset) => new URL(asset, BASE_URL).toString());
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -39,7 +40,7 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
           return networkResponse;
         })
-        .catch(() => caches.match('/'));
+        .catch(() => caches.match(BASE_URL));
     })
   );
 });

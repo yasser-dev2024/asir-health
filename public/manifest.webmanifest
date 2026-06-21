@@ -4,8 +4,8 @@
   "description": "منصة صحية سياحية ذكية لمنطقة عسير تعمل كتطبيق ويب تقدمي.",
   "lang": "ar",
   "dir": "rtl",
-  "start_url": "/?source=pwa",
-  "scope": "/",
+  "start_url": "./?source=pwa",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#f8fafc",
@@ -13,13 +13,13 @@
   "categories": ["health", "travel", "lifestyle"],
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/maskable-icon.svg",
+      "src": "maskable-icon.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "maskable"

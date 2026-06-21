@@ -5,11 +5,24 @@ import { SplashScreen } from './components/SplashScreen';
 import { AppRoutes } from './routes/AppRoutes';
 import { useAppStore } from './store/appStore';
 
+const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+function getAppPath() {
+  const path = window.location.pathname;
+
+  if (basePath && path.startsWith(basePath)) {
+    return path.slice(basePath.length) || '/';
+  }
+
+  return path;
+}
+
 function App() {
   const setSplashSeen = useAppStore((state) => state.setSplashSeen);
   const smartEntryCompleted = useAppStore((state) => state.smartEntryCompleted);
-  const adminPath = window.location.pathname.startsWith('/admin');
-  const assistantPath = window.location.pathname === '/assistant';
+  const appPath = getAppPath();
+  const adminPath = appPath.startsWith('/admin');
+  const assistantPath = appPath === '/assistant';
   const searchParams = new URLSearchParams(window.location.search);
   const forceSplash = searchParams.get('showSplash') === '1';
   const forceEntry = searchParams.get('showEntry') === '1';
@@ -26,7 +39,7 @@ function App() {
   return (
     <>
       <SplashScreen autoClose={!forceSplash} onDone={completeSplash} visible={splashVisible} />
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <AppRoutes />
         <SmartHealthEntry force={forceEntry} visible={smartEntryVisible} />
       </BrowserRouter>
