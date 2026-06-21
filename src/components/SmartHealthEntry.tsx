@@ -8,6 +8,7 @@ import type { AgeGroup, CompanionType, JourneyAnswers, JourneyType, SmartEntryTr
 interface SmartHealthEntryProps {
   visible: boolean;
   force?: boolean;
+  onDone?: () => void;
 }
 
 type EntryStep = 'age' | 'visitor' | 'call937' | 'nearby' | 'facility' | 'trip' | 'result';
@@ -55,7 +56,7 @@ function toJourneyAnswers(ageGroupId: string, visitorType: VisitorType | undefin
   };
 }
 
-export function SmartHealthEntry({ visible, force = false }: SmartHealthEntryProps) {
+export function SmartHealthEntry({ visible, force = false, onDone }: SmartHealthEntryProps) {
   const navigate = useNavigate();
   const config = useAppStore((state) => state.smartEntryConfig);
   const setSmartEntryCompleted = useAppStore((state) => state.setSmartEntryCompleted);
@@ -84,6 +85,8 @@ export function SmartHealthEntry({ visible, force = false }: SmartHealthEntryPro
     if (!force) {
       setSmartEntryCompleted();
     }
+
+    onDone?.();
 
     if (route?.startsWith('/')) {
       navigate(route);
