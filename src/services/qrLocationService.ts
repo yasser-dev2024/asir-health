@@ -7,6 +7,8 @@ const knownLocationSlugs = new Map<string, string>([
   ['مطار أبها', 'abha-airport'],
   ['ممشى الضباب', 'fog-walkway'],
   ['السودة', 'soudah'],
+  ['السودة متنزه الضباب', 'alswdh-mtnzh-aldbab'],
+  ['مصلى العيد', 'msla-alayd'],
 ]);
 
 const arabicSlugMap: Record<string, string> = {

@@ -7,6 +7,7 @@ import {
   initialKeywordAnswers,
   initialMetrics,
   initialPassport,
+  initialQrLocations,
   initialQrScans,
   initialSmartEntryConfig,
 } from '../data/mockData';
@@ -196,7 +197,7 @@ function increaseMetric(metrics: AdminMetrics, key: keyof AdminMetrics, amount =
 }
 
 const QR_REPEAT_WINDOW_MS = 10 * 60 * 1000;
-const STORE_VERSION = 2;
+const STORE_VERSION = 3;
 const SEEDED_METRICS_BASELINE: AdminMetrics = {
   visitors: 18420,
   qrScans: 6940,
@@ -251,6 +252,49 @@ function qrStatsFromVisits(qrVisits: QrVisit[]) {
   return stats;
 }
 
+function mergeQrLocationsWithDefaults(locations: QrLocation[] | undefined): QrLocation[] {
+  const merged = new Map<string, QrLocation>();
+
+  initialQrLocations.forEach((location) => {
+    merged.set(location.slug, location);
+  });
+
+  if (!Array.isArray(locations)) {
+    return Array.from(merged.values());
+  }
+
+  locations.forEach((location) => {
+    const slug = sanitizeText(location.slug).trim().toLowerCase();
+
+    if (!slug) {
+      return;
+    }
+
+    const defaultLocation = merged.get(slug);
+    merged.set(slug, {
+      ...(defaultLocation ?? {
+        id: createId('qr-location'),
+        name: slug,
+        description: '',
+        active: true,
+        scans: 0,
+        lastScanAt: '',
+        createdAt: new Date().toISOString(),
+      }),
+      ...location,
+      slug,
+      name: sanitizeText(location.name || defaultLocation?.name || slug),
+      description: sanitizeText(location.description || defaultLocation?.description || ''),
+      active: typeof location.active === 'boolean' ? location.active : defaultLocation?.active ?? true,
+      scans: Number.isFinite(location.scans) ? Math.max(0, Number(location.scans)) : (defaultLocation?.scans ?? 0),
+      lastScanAt: sanitizeText(location.lastScanAt || defaultLocation?.lastScanAt || ''),
+      createdAt: sanitizeText(location.createdAt || defaultLocation?.createdAt || new Date().toISOString()),
+    });
+  });
+
+  return Array.from(merged.values());
+}
+
 function cleanPersistedAnalytics(persistedState: Partial<AppState>): Partial<AppState> {
   const qrVisits = Array.isArray(persistedState.qrVisits) ? persistedState.qrVisits : [];
   const qrVisitStats = qrStatsFromVisits(qrVisits);
@@ -289,6 +333,7 @@ function cleanPersistedAnalytics(persistedState: Partial<AppState>): Partial<App
     ...persistedState,
     qrScans: [...knownQrScans, ...otherQrScans],
     qrVisits,
+    qrLocations: mergeQrLocationsWithDefaults(persistedState.qrLocations),
   };
 
   if (persistedState.metrics) {
@@ -340,7 +385,7 @@ export const useAppStore = create<AppState>()(
       passport: initialPassport,
       qrScans: initialQrScans,
       qrVisits: [],
-      qrLocations: [],
+      qrLocations: initialQrLocations,
       qrLocationVisits: [],
       visitorId: getOrCreateVisitorId(),
       smartEntryConfig: initialSmartEntryConfig,
@@ -762,6 +807,19 @@ export const useAppStore = create<AppState>()(
         }
 
         return cleanPersistedAnalytics(persistedState as Partial<AppState>) as AppState;
+      },
+      merge: (persistedState, currentState) => {
+        if (!persistedState || typeof persistedState !== 'object') {
+          return currentState;
+        }
+
+        const state = persistedState as Partial<AppState>;
+
+        return {
+          ...currentState,
+          ...state,
+          qrLocations: mergeQrLocationsWithDefaults(state.qrLocations),
+        };
       },
       partialize: (state) => ({
         metrics: state.metrics,

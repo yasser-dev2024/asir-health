@@ -7,6 +7,7 @@ import type {
   KeywordAnswer,
   PassportLevel,
   PassportProfile,
+  QrLocation,
   QrScan,
   SmartEntryConfig,
   Walkway,
@@ -304,6 +305,29 @@ export const initialQrScans: QrScan[] = [
     location: 'ركن الفعاليات',
     visits: 0,
     lastRoute: '-',
+  },
+];
+
+export const initialQrLocations: QrLocation[] = [
+  {
+    id: 'qr-location-soudah-fog-park',
+    name: 'السودة متنزه الضباب',
+    description: 'منطقة سياحية في السودة مرتبطة بعداد QR مركزي موحد بين الجوال والحاسب.',
+    slug: 'alswdh-mtnzh-aldbab',
+    active: true,
+    scans: 0,
+    lastScanAt: '',
+    createdAt: '2026-06-21T00:00:00.000Z',
+  },
+  {
+    id: 'qr-location-eid-prayer-area',
+    name: 'مصلى العيد',
+    description: 'نقطة ميدانية مهيأة للتجربة والعد المركزي من أي جهاز.',
+    slug: 'msla-alayd',
+    active: true,
+    scans: 0,
+    lastScanAt: '',
+    createdAt: '2026-06-21T00:00:00.000Z',
   },
 ];
 
