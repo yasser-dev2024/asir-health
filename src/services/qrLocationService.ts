@@ -108,11 +108,11 @@ export function buildQrLocationUrl(slug: string) {
   return url.toString();
 }
 
-export function generateQrPngDataUrl(url: string) {
+export function generateQrPngDataUrl(url: string, width = 1600) {
   return QRCode.toDataURL(url, {
-    errorCorrectionLevel: 'M',
-    margin: 2,
-    scale: 8,
+    errorCorrectionLevel: 'H',
+    margin: 4,
+    width,
     color: {
       dark: '#0f766e',
       light: '#ffffff',

@@ -145,6 +145,24 @@ canvas {
     linear-gradient(45deg, rgba(185, 28, 28, 0.08), rgba(4, 120, 87, 0.08));
 }
 
+.splash-clear-panel {
+  position: relative;
+  isolation: isolate;
+  padding: 18px 10px 14px;
+  border-radius: 30px;
+}
+
+.splash-clear-panel::before {
+  content: "";
+  position: absolute;
+  inset: 20% 3% 12%;
+  z-index: -1;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 247, 237, 0.34), rgba(255, 247, 237, 0.1) 46%, transparent 72%);
+  filter: blur(16px);
+  pointer-events: none;
+}
+
 .splash-sun-ring {
   position: absolute;
   top: 9%;

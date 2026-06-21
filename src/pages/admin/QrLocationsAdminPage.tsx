@@ -61,7 +61,7 @@ function QrPreview({ slug }: { slug: string }) {
   useEffect(() => {
     let mounted = true;
 
-    generateQrPngDataUrl(buildQrLocationUrl(slug))
+    generateQrPngDataUrl(buildQrLocationUrl(slug), 900)
       .then((dataUrl) => {
         if (mounted) {
           setSrc(dataUrl);
@@ -80,8 +80,8 @@ function QrPreview({ slug }: { slug: string }) {
 
   if (!src) {
     return (
-      <span className="grid size-16 place-items-center rounded-lg bg-slate-100 text-slate-400">
-        <QrCode className="size-6" />
+      <span className="grid size-36 place-items-center rounded-lg bg-slate-100 text-slate-400 sm:size-40">
+        <QrCode className="size-10" />
       </span>
     );
   }
@@ -89,7 +89,7 @@ function QrPreview({ slug }: { slug: string }) {
   return (
     <img
       alt={`QR ${slug}`}
-      className="size-16 rounded-lg border border-slate-200 bg-white object-contain p-1"
+      className="size-36 rounded-lg border border-slate-200 bg-white object-contain p-2 shadow-sm sm:size-40"
       src={src}
     />
   );
@@ -193,10 +193,10 @@ export function QrLocationsAdminPage() {
   }
 
   async function downloadQr(location: QrLocation) {
-    const dataUrl = await generateQrPngDataUrl(buildQrLocationUrl(location.slug));
+    const dataUrl = await generateQrPngDataUrl(buildQrLocationUrl(location.slug), 1800);
     const link = document.createElement('a');
     link.href = dataUrl;
-    link.download = `qr-${location.slug}.png`;
+    link.download = `print-qr-${location.slug}.png`;
     link.click();
   }
 
@@ -355,7 +355,7 @@ export function QrLocationsAdminPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-[980px] w-full text-right text-sm">
+          <table className="min-w-[1120px] w-full text-right text-sm">
             <thead>
               <tr className="border-b border-slate-200 text-slate-500">
                 <th className="px-3 py-3 font-black">صورة QR</th>
@@ -397,7 +397,7 @@ export function QrLocationsAdminPage() {
                     <td className="px-3 py-3">
                       <div className="flex flex-wrap gap-2">
                         <Button icon={<Download className="size-4" />} onClick={() => downloadQr(location)} variant="secondary">
-                          تحميل QR
+                          تحميل للطباعة
                         </Button>
                         <Button icon={<Copy className="size-4" />} onClick={() => copyLink(location.slug)} variant="secondary">
                           {copiedSlug === location.slug ? 'تم النسخ' : 'نسخ الرابط'}

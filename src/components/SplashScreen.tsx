@@ -1,4 +1,4 @@
-import { Activity, HeartPulse, MapPinned, Route, Sparkles } from 'lucide-react';
+import { HeartPulse, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import asirSplashView from '../assets/asir-splash-view.png';
 import { Button } from './ui/Button';
@@ -8,12 +8,6 @@ interface SplashScreenProps {
   onDone: () => void;
   autoClose?: boolean;
 }
-
-const promiseItems = [
-  { label: 'موقعك', icon: MapPinned },
-  { label: 'نبض صحي', icon: Activity },
-  { label: 'مسار الرحلة', icon: Route },
-];
 
 export function SplashScreen({ visible, onDone, autoClose = true }: SplashScreenProps) {
   const [leaving, setLeaving] = useState(false);
@@ -79,7 +73,7 @@ export function SplashScreen({ visible, onDone, autoClose = true }: SplashScreen
       <span className="splash-glint splash-glint-three" />
 
       <div className="relative grid h-dvh place-items-center px-5 pb-[calc(env(safe-area-inset-bottom)+2rem)] pt-[calc(env(safe-area-inset-top)+2rem)]">
-        <div className="splash-glass-panel w-full max-w-sm text-center">
+        <div className="splash-clear-panel w-full max-w-sm text-center">
           <div className="splash-float relative mx-auto grid size-28 place-items-center rounded-[2rem] border border-white/70 bg-gradient-to-br from-teal-500 via-emerald-500 to-amber-300 shadow-2xl shadow-teal-950/20">
             <span className="splash-pulse absolute size-28 rounded-[2rem] border border-white/70" />
             <span className="splash-heart-glow absolute inset-3 rounded-[1.45rem]" />
@@ -94,25 +88,14 @@ export function SplashScreen({ visible, onDone, autoClose = true }: SplashScreen
             </span>
           </div>
 
-          <h1 className="splash-reveal mt-5 bg-gradient-to-l from-teal-700 via-emerald-600 to-amber-500 bg-clip-text text-5xl font-black leading-tight tracking-normal text-transparent">
+          <h1 className="splash-reveal splash-strong-text mt-5 text-5xl font-black leading-tight tracking-normal text-white">
             صيف وصحة
           </h1>
-          <p className="splash-reveal splash-reveal-delay mt-3 text-xl font-black text-slate-700">
+          <p className="splash-reveal splash-reveal-delay splash-strong-text mt-3 text-xl font-black text-amber-50">
             أهلاً بك في عسير
           </p>
-          <div className="mt-8 grid grid-cols-3 gap-2">
-            {promiseItems.map((item) => (
-              <div
-                className="rounded-lg border border-white/80 bg-white/74 p-3 text-slate-800 shadow-lg shadow-sky-950/10 backdrop-blur"
-                key={item.label}
-              >
-                <item.icon className="mx-auto size-5 text-teal-600" />
-                <p className="mt-2 text-xs font-black">{item.label}</p>
-              </div>
-            ))}
-          </div>
 
-          <div className="mt-10 text-right" aria-label="جاري تجهيز التجربة">
+          <div className="mt-8 text-right" aria-label="جاري تجهيز التجربة">
             <div className="h-2 overflow-hidden rounded-full bg-slate-200/85 shadow-inner shadow-slate-950/10">
               <span className="splash-loading-bar block h-full rounded-full bg-[linear-gradient(90deg,#0f766e,#2dd4bf,#fbbf24,#ffffff)] shadow-[0_0_24px_rgba(20,184,166,0.65)]" />
             </div>
