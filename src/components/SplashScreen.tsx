@@ -1,6 +1,6 @@
 import { Activity, HeartPulse, MapPinned, Route, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import asirHeritageSplash from '../assets/asir-heritage-splash.png';
+import asirSplashView from '../assets/asir-splash-view.png';
 import { Button } from './ui/Button';
 
 interface SplashScreenProps {
@@ -47,9 +47,9 @@ export function SplashScreen({ visible, onDone, autoClose = true }: SplashScreen
       }`}
     >
       <img
-        alt="جبال عسير وتراثها"
-        className="splash-scene-zoom splash-image fixed inset-0 h-dvh w-full object-cover object-bottom"
-        src={asirHeritageSplash}
+        alt="منظر مبهج من عسير"
+        className="splash-scene-zoom splash-image fixed inset-0 h-dvh w-full object-cover object-center"
+        src={asirSplashView}
       />
       <div className="splash-backdrop fixed inset-0" />
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_10%,rgba(255,255,255,0.34),transparent_28%),linear-gradient(180deg,rgba(236,253,245,0.16),rgba(15,118,110,0.18)_58%,rgba(2,6,23,0.58))]" />
@@ -69,6 +69,14 @@ export function SplashScreen({ visible, onDone, autoClose = true }: SplashScreen
       <span className="splash-gold-dot splash-gold-dot-one" />
       <span className="splash-gold-dot splash-gold-dot-two" />
       <span className="splash-gold-dot splash-gold-dot-three" />
+      <span className="splash-particle splash-particle-one" />
+      <span className="splash-particle splash-particle-two" />
+      <span className="splash-particle splash-particle-three" />
+      <span className="splash-particle splash-particle-four" />
+      <span className="splash-particle splash-particle-five" />
+      <span className="splash-glint splash-glint-one" />
+      <span className="splash-glint splash-glint-two" />
+      <span className="splash-glint splash-glint-three" />
 
       <div className="relative grid h-dvh place-items-center px-5 pb-[calc(env(safe-area-inset-bottom)+2rem)] pt-[calc(env(safe-area-inset-top)+2rem)]">
         <div className="splash-glass-panel w-full max-w-sm text-center">
@@ -80,7 +88,7 @@ export function SplashScreen({ visible, onDone, autoClose = true }: SplashScreen
 
           <div className="splash-welcome-burst mt-6 inline-flex items-center gap-2 rounded-full border border-emerald-100/80 bg-white/78 px-6 py-3 text-2xl font-black text-emerald-950 shadow-[0_0_40px_rgba(45,212,191,0.32)]">
             <Sparkles className="size-5 text-amber-500" />
-            <span className="inline-flex flex-row items-baseline gap-2" dir="ltr">
+            <span className="inline-flex flex-row items-baseline gap-2" dir="rtl">
               <span dir="rtl">مرحبا</span>
               <span className="text-3xl text-teal-700">1000</span>
             </span>

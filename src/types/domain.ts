@@ -118,6 +118,27 @@ export interface QrVisit {
   route: string;
 }
 
+export interface QrLocation {
+  id: string;
+  name: string;
+  description: string;
+  slug: string;
+  active: boolean;
+  scans: number;
+  lastScanAt: string;
+  createdAt: string;
+}
+
+export interface QrLocationVisit {
+  id: string;
+  visitorId: string;
+  locationId: string;
+  slug: string;
+  locationName: string;
+  timestamp: string;
+  route: string;
+}
+
 export interface AdminMetrics {
   visitors: number;
   qrScans: number;

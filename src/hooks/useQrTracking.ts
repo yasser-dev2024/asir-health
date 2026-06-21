@@ -5,6 +5,7 @@ import { useAppStore } from '../store/appStore';
 export function useQrTracking() {
   const location = useLocation();
   const recordQrScan = useAppStore((state) => state.recordQrScan);
+  const recordQrLocationScan = useAppStore((state) => state.recordQrLocationScan);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -14,6 +15,11 @@ export function useQrTracking() {
       return;
     }
 
-    recordQrScan(qr, `${location.pathname}${location.search}`);
-  }, [location.pathname, location.search, recordQrScan]);
+    const route = `${location.pathname}${location.search}`;
+    const locationResult = recordQrLocationScan(qr, route);
+
+    if (!locationResult.location) {
+      recordQrScan(qr, route);
+    }
+  }, [location.pathname, location.search, recordQrLocationScan, recordQrScan]);
 }

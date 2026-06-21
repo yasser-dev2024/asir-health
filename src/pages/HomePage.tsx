@@ -13,8 +13,8 @@ import {
   Users,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import asirHero from '../assets/asir-hero-mobile.jpg';
+import { useLocation, useNavigate } from 'react-router-dom';
+import asirHomeFeature from '../assets/asir-home-feature.png';
 import { Button } from '../components/ui/Button';
 import { useAppStore } from '../store/appStore';
 import type { AgeGroup, CompanionType, CurrentLocation, JourneyAnswers, JourneyType, VisitPurpose } from '../types/domain';
@@ -167,7 +167,9 @@ function toJourneyAnswers(profile: WelcomeProfile): JourneyAnswers {
 
 export function HomePage() {
   const navigate = useNavigate();
+  const routerLocation = useLocation();
   const metrics = useAppStore((state) => state.metrics);
+  const qrLocations = useAppStore((state) => state.qrLocations);
   const setJourneyAnswers = useAppStore((state) => state.setJourneyAnswers);
   const [profile, setProfile] = useState<WelcomeProfile>({
     currentLocation: 'abha',
@@ -176,6 +178,15 @@ export function HomePage() {
     visitPurpose: 'family',
   });
   const recommendations = useMemo(() => buildRecommendations(profile), [profile]);
+  const qrWelcomeLocation = useMemo(() => {
+    const slug = new URLSearchParams(routerLocation.search).get('qr')?.trim().toLowerCase();
+
+    if (!slug) {
+      return undefined;
+    }
+
+    return qrLocations.find((location) => location.slug === slug && location.active);
+  }, [routerLocation.search, qrLocations]);
 
   function startPersonalPlan() {
     setJourneyAnswers(toJourneyAnswers(profile));
@@ -188,7 +199,7 @@ export function HomePage() {
         <img
           alt="منظر من عسير"
           className="absolute inset-0 h-full w-full object-cover object-center"
-          src={asirHero}
+          src={asirHomeFeature}
         />
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,78,59,0.48),rgba(9,75,78,0.62)_42%,rgba(2,6,23,0.92))]" />
         <div className="home-asir-strip absolute inset-x-0 top-0 h-3" />
@@ -199,7 +210,7 @@ export function HomePage() {
           <div className="pb-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/14 px-4 py-2 text-sm font-black text-amber-50 shadow-lg shadow-slate-950/20">
               <Sparkles className="size-4 text-amber-200" />
-              منطقة عسير ترحب بك
+              {qrWelcomeLocation ? `مرحبًا بك في صيف وصحة – ${qrWelcomeLocation.name}` : 'منطقة عسير ترحب بك'}
             </div>
             <h1 className="mt-5 text-5xl font-black leading-tight tracking-normal sm:text-7xl">صيف وصحة</h1>
             <p className="mt-4 max-w-lg text-lg font-bold leading-9 text-white/92">
@@ -304,6 +315,37 @@ export function HomePage() {
             <p className="hidden text-sm font-bold text-slate-500 sm:block">
               {metrics.journeys.toLocaleString('ar-SA')} رحلة مخططة
             </p>
+          </div>
+
+          <div className="mb-4 grid overflow-hidden rounded-lg border border-emerald-100 bg-white shadow-sm md:grid-cols-[1.05fr_0.95fr]">
+            <div className="relative min-h-64 overflow-hidden">
+              <img
+                alt="منظر مبهج من عسير"
+                className="absolute inset-0 h-full w-full object-cover"
+                src={asirHomeFeature}
+              />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(6,78,59,0.22))]" />
+              <span className="home-gold-thread absolute top-10 left-[-20%] h-0.5 w-[96%] rotate-[-12deg]" />
+              <span className="home-gold-thread home-gold-thread-delay absolute bottom-16 right-[-22%] h-0.5 w-[92%] rotate-[16deg]" />
+            </div>
+            <div className="grid content-center gap-3 p-4 sm:p-5">
+              <span className="w-fit rounded-full bg-amber-100 px-3 py-1 text-xs font-black text-amber-700">
+                رحلة صيفية آمنة
+              </span>
+              <h3 className="text-2xl font-black leading-tight text-slate-950">
+                اختر وجهتك، وخذ تنبيهك الصحي، واستمتع بجمال عسير.
+              </h3>
+              <p className="text-sm font-bold leading-7 text-slate-600">
+                من مرتفعات عسير إلى الممشى والفعاليات، كل خطوة أجمل عندما تكون رحلتك مريحة وآمنة.
+              </p>
+              <div className="grid grid-cols-3 gap-2">
+                {['سياحة', 'صحة', 'فرح'].map((label) => (
+                  <div className="rounded-lg bg-slate-50 px-3 py-3 text-center text-sm font-black text-emerald-800" key={label}>
+                    {label}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="grid gap-3 md:grid-cols-3">

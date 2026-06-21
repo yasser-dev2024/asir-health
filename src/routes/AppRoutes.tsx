@@ -11,6 +11,7 @@ import { PassportPage } from '../pages/PassportPage';
 import { PlanPage } from '../pages/PlanPage';
 import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
 import { AdminLoginPage } from '../pages/admin/AdminLoginPage';
+import { QrLocationsAdminPage } from '../pages/admin/QrLocationsAdminPage';
 
 export function AppRoutes() {
   return (
@@ -28,6 +29,7 @@ export function AppRoutes() {
       <Route element={<AdminLoginPage />} path="/admin/login" />
       <Route element={<AdminLayout />} path="/admin">
         <Route element={<AdminDashboardPage />} index />
+        <Route element={<QrLocationsAdminPage />} path="qr-locations" />
       </Route>
       <Route element={<Navigate replace to="/" />} path="*" />
     </Routes>

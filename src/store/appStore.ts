@@ -19,6 +19,8 @@ import type {
   JourneyAnswers,
   KeywordAnswer,
   PassportProfile,
+  QrLocation,
+  QrLocationVisit,
   QrScan,
   QrVisit,
   SmartEntryConfig,
@@ -26,12 +28,14 @@ import type {
 import { createId, safeUrl, sanitizeList, sanitizeText } from '../utils/security';
 import { logEvent } from '../services/logger';
 import { getOrCreateVisitorId, normalizeQrSource, qrSourceLabel } from '../utils/privacy';
+import { uniqueLocationSlug } from '../services/qrLocationService';
 
 type KeywordPayload = Omit<KeywordAnswer, 'id' | 'active' | 'usage' | 'updatedAt'>;
 type EventPayload = Omit<HealthEvent, 'id' | 'active' | 'visits' | 'tone'>;
 type ContentPayload = Omit<AwarenessContent, 'id' | 'active' | 'updatedAt'>;
 type SmartEntryConfigPayload = SmartEntryConfig;
 type DoctorAssistantPayload = Omit<DoctorAssistantQuestion, 'id' | 'updatedAt'>;
+type QrLocationPayload = Pick<QrLocation, 'name' | 'description' | 'active'>;
 
 interface AppState {
   metrics: AdminMetrics;
@@ -42,6 +46,8 @@ interface AppState {
   passport: PassportProfile;
   qrScans: QrScan[];
   qrVisits: QrVisit[];
+  qrLocations: QrLocation[];
+  qrLocationVisits: QrLocationVisit[];
   visitorId: string;
   smartEntryConfig: SmartEntryConfig;
   smartEntryCompleted: boolean;
@@ -73,6 +79,11 @@ interface AppState {
   moveDoctorAssistantQuestion: (id: string, direction: 'up' | 'down') => void;
   addPassportPoints: (points: number, label: string) => void;
   recordQrScan: (source: string, route: string) => boolean;
+  addQrLocation: (payload: QrLocationPayload) => void;
+  updateQrLocation: (id: string, payload: QrLocationPayload) => void;
+  deleteQrLocation: (id: string) => void;
+  toggleQrLocation: (id: string) => void;
+  recordQrLocationScan: (slug: string, route: string) => { counted: boolean; location?: QrLocation };
   resetSmartEntry: () => void;
   setSmartEntryCompleted: () => void;
   updateSmartEntryConfig: (config: SmartEntryConfigPayload) => void;
@@ -124,6 +135,16 @@ function cleanDoctorAssistantPayload(payload: DoctorAssistantPayload): DoctorAss
     keywords: sanitizeList(payload.keywords),
     active: Boolean(payload.active),
     order: Number.isFinite(payload.order) ? payload.order : 999,
+  };
+}
+
+function cleanQrLocationPayload(payload: QrLocationPayload): QrLocationPayload {
+  const name = sanitizeText(payload.name).trim();
+
+  return {
+    name: name || 'منطقة جديدة',
+    description: sanitizeText(payload.description).trim(),
+    active: Boolean(payload.active),
   };
 }
 
@@ -319,6 +340,8 @@ export const useAppStore = create<AppState>()(
       passport: initialPassport,
       qrScans: initialQrScans,
       qrVisits: [],
+      qrLocations: [],
+      qrLocationVisits: [],
       visitorId: getOrCreateVisitorId(),
       smartEntryConfig: initialSmartEntryConfig,
       smartEntryCompleted: false,
@@ -520,6 +543,126 @@ export const useAppStore = create<AppState>()(
             },
           };
         }),
+      addQrLocation: (payload) => {
+        const cleaned = cleanQrLocationPayload(payload);
+
+        set((state) => {
+          const timestamp = new Date().toISOString();
+          const created: QrLocation = {
+            id: createId('qr-location'),
+            ...cleaned,
+            slug: uniqueLocationSlug(cleaned.name, state.qrLocations.map((location) => location.slug)),
+            scans: 0,
+            lastScanAt: '',
+            createdAt: timestamp,
+          };
+
+          logEvent('info', 'qr_location_created', { slug: created.slug });
+
+          return {
+            qrLocations: [created, ...state.qrLocations],
+          };
+        });
+      },
+      updateQrLocation: (id, payload) => {
+        const cleaned = cleanQrLocationPayload(payload);
+        set((state) => ({
+          qrLocations: state.qrLocations.map((location) =>
+            location.id === id
+              ? {
+                  ...location,
+                  ...cleaned,
+                }
+              : location
+          ),
+        }));
+      },
+      deleteQrLocation: (id) =>
+        set((state) => ({
+          qrLocations: state.qrLocations.filter((location) => location.id !== id),
+          qrLocationVisits: state.qrLocationVisits.filter((visit) => visit.locationId !== id),
+        })),
+      toggleQrLocation: (id) =>
+        set((state) => ({
+          qrLocations: state.qrLocations.map((location) =>
+            location.id === id ? { ...location, active: !location.active } : location
+          ),
+        })),
+      recordQrLocationScan: (slug, route) => {
+        const visitorId = getOrCreateVisitorId();
+        const cleanSlug = sanitizeText(slug).trim().toLowerCase();
+        const cleanRoute = sanitizeText(route || window.location.pathname || '/');
+        const timestamp = new Date().toISOString();
+        let result: { counted: boolean; location?: QrLocation } = { counted: false };
+
+        set((state) => {
+          const location = state.qrLocations.find((item) => item.slug === cleanSlug);
+
+          if (!location) {
+            return { visitorId };
+          }
+
+          result = { counted: false, location };
+
+          if (!location.active) {
+            logEvent('info', 'qr_location_inactive_ignored', { slug: cleanSlug });
+            return { visitorId };
+          }
+
+          const now = new Date(timestamp).getTime();
+          const repeated = state.qrLocationVisits.some(
+            (visit) =>
+              visit.visitorId === visitorId &&
+              visit.slug === cleanSlug &&
+              now - new Date(visit.timestamp).getTime() < QR_REPEAT_WINDOW_MS
+          );
+
+          if (repeated) {
+            logEvent('info', 'qr_location_repeated_ignored', { slug: cleanSlug, route: cleanRoute });
+            return { visitorId };
+          }
+
+          const updatedLocation: QrLocation = {
+            ...location,
+            scans: location.scans + 1,
+            lastScanAt: timestamp,
+          };
+
+          result = { counted: true, location: updatedLocation };
+
+          const qrLocationVisits: QrLocationVisit[] = [
+            {
+              id: createId('qr-location-visit'),
+              visitorId,
+              locationId: location.id,
+              slug: cleanSlug,
+              locationName: location.name,
+              timestamp,
+              route: cleanRoute,
+            },
+            ...state.qrLocationVisits,
+          ].slice(0, 1000);
+
+          logEvent('info', 'qr_location_scan_counted_privacy_safe', { slug: cleanSlug, route: cleanRoute });
+
+          return {
+            visitorId,
+            qrLocationVisits,
+            qrLocations: state.qrLocations.map((item) =>
+              item.id === location.id ? updatedLocation : item
+            ),
+            metrics: increaseMetric(increaseMetric(state.metrics, 'qrScans'), 'visitors'),
+            passport: {
+              ...state.passport,
+              points: state.passport.points + 15,
+              scans: state.passport.scans + 1,
+              achievements: [`مسح QR منطقة: ${location.name}`, ...state.passport.achievements].slice(0, 8),
+            },
+          };
+        });
+
+        return result;
+      },
       recordQrScan: (source, route) => {
         const visitorId = getOrCreateVisitorId();
         const qrSource = normalizeQrSource(source || 'QR_UNKNOWN');
@@ -629,6 +772,8 @@ export const useAppStore = create<AppState>()(
         passport: state.passport,
         qrScans: state.qrScans,
         qrVisits: state.qrVisits,
+        qrLocations: state.qrLocations,
+        qrLocationVisits: state.qrLocationVisits,
         visitorId: state.visitorId,
         smartEntryConfig: state.smartEntryConfig,
         smartEntryCompleted: state.smartEntryCompleted,
