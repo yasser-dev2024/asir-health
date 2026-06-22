@@ -31,6 +31,16 @@ interface QrLocationFormState {
   active: boolean;
 }
 
+interface QrScanLogRow {
+  scanId: string;
+  qrId: string;
+  qrName: string;
+  visitorId: string;
+  dateTime: string;
+  sourceUrl: string;
+  sortTime: number;
+}
+
 const emptyForm: QrLocationFormState = {
   name: '',
   description: '',
@@ -194,6 +204,67 @@ export function QrLocationsAdminPage() {
     };
   }, [locationsWithStats, qrLocationVisits]);
 
+  const scanLogRows = useMemo<QrScanLogRow[]>(() => {
+    const rows = new Map<string, QrScanLogRow>();
+
+    qrLocationVisits.forEach((visit) => {
+      const sortTime = new Date(visit.timestamp).getTime();
+
+      rows.set(visit.id, {
+        scanId: visit.id,
+        qrId: visit.locationId,
+        qrName: visit.locationName,
+        visitorId: visit.visitorId,
+        dateTime: visit.timestamp,
+        sourceUrl: visit.route,
+        sortTime: Number.isNaN(sortTime) ? 0 : sortTime,
+      });
+    });
+
+    locationsWithStats.forEach((location) => {
+      const remote = centralStats[location.slug];
+
+      if (!remote?.updatedAt) {
+        return;
+      }
+
+      const sourceUrl = buildQrLocationUrl(location.slug, location.name);
+
+      remote.scanLogs.forEach((scan) => {
+        const sortTime = new Date(scan.dateTime).getTime();
+
+        rows.set(scan.scanId, {
+          scanId: scan.scanId,
+          qrId: location.id,
+          qrName: location.name,
+          visitorId: scan.visitorId,
+          dateTime: scan.dateTime,
+          sourceUrl,
+          sortTime: Number.isNaN(sortTime) ? 0 : sortTime,
+        });
+      });
+
+      if (!remote.scanLogs.length) {
+        const sortTime = new Date(remote.updatedAt).getTime();
+        const scanId = `central-${location.slug}-${remote.updatedAt}`;
+
+        rows.set(scanId, {
+          scanId,
+          qrId: location.id,
+          qrName: location.name,
+          visitorId: 'central-counter',
+          dateTime: remote.updatedAt,
+          sourceUrl,
+          sortTime: Number.isNaN(sortTime) ? 0 : sortTime,
+        });
+      }
+    });
+
+    return Array.from(rows.values())
+      .sort((first, second) => second.sortTime - first.sortTime)
+      .slice(0, 50);
+  }, [centralStats, locationsWithStats, qrLocationVisits]);
+
   function resetForm() {
     setForm(emptyForm);
     setEditingId(null);
@@ -318,7 +389,7 @@ export function QrLocationsAdminPage() {
           value={stats.totalCreated.toLocaleString('ar-SA')}
         />
         <MetricCard
-          helper="بعد منع التكرار خلال 10 دقائق"
+          helper="يتم احتساب كل مسح QR"
           icon={<BarChart3 className="size-5" />}
           label="إجمالي المسحات"
           value={stats.totalScans.toLocaleString('ar-SA')}
@@ -537,6 +608,52 @@ export function QrLocationsAdminPage() {
         {!qrLocations.length ? (
           <div className="mt-4 rounded-lg bg-slate-50 p-6 text-center text-sm font-bold text-slate-500">
             لا توجد مناطق بعد. اضغط "إضافة QR جديد" لإنشاء أول رابط.
+          </div>
+        ) : null}
+      </section>
+
+      <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="mb-4">
+          <h2 className="text-xl font-black text-slate-950">QR Scan Log</h2>
+          <p className="mt-1 text-sm font-bold text-slate-500">
+            سجل آخر عمليات المسح حسب النقطة والوقت ومصدر الرابط.
+          </p>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="min-w-[1120px] w-full text-right text-sm">
+            <thead>
+              <tr className="border-b border-slate-200 text-slate-500">
+                <th className="px-3 py-3 font-black">Scan ID</th>
+                <th className="px-3 py-3 font-black">QR ID</th>
+                <th className="px-3 py-3 font-black">QR Name</th>
+                <th className="px-3 py-3 font-black">Visitor ID</th>
+                <th className="px-3 py-3 font-black">DateTime</th>
+                <th className="px-3 py-3 font-black">Source URL</th>
+              </tr>
+            </thead>
+            <tbody>
+              {scanLogRows.map((row) => (
+                <tr className="border-b border-slate-100 align-top" key={row.scanId}>
+                  <td className="px-3 py-3 font-mono text-xs font-bold text-slate-700">{row.scanId}</td>
+                  <td className="px-3 py-3 font-mono text-xs font-bold text-slate-700">{row.qrId}</td>
+                  <td className="px-3 py-3 font-black text-slate-950">{row.qrName}</td>
+                  <td className="px-3 py-3 font-mono text-xs font-bold text-slate-600">{row.visitorId}</td>
+                  <td className="px-3 py-3 text-slate-600">{formatDate(row.dateTime)}</td>
+                  <td className="px-3 py-3">
+                    <code className="block max-w-md truncate rounded-lg bg-slate-50 px-2 py-2 text-xs font-bold text-slate-600">
+                      {row.sourceUrl}
+                    </code>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {!scanLogRows.length ? (
+          <div className="mt-4 rounded-lg bg-slate-50 p-6 text-center text-sm font-bold text-slate-500">
+            لا توجد مسحات QR مسجلة بعد.
           </div>
         ) : null}
       </section>

@@ -18,7 +18,7 @@ export function useQrTracking() {
       return;
     }
 
-    const route = `${location.pathname}${location.search}`;
+    const route = window.location.href;
     const locationResult = hasLocationQr
       ? recordQrLocationScan(qr, route, qrName)
       : ({ counted: false } as ReturnType<typeof recordQrLocationScan>);
@@ -26,7 +26,7 @@ export function useQrTracking() {
       locationResult.location || locationResult.external ? locationResult.counted : recordQrScan(qr, route);
 
     if (counted) {
-      void syncQrScanToCentralCounter(locationResult.slug ?? locationResult.location?.slug ?? qr).catch(() => undefined);
+      void syncQrScanToCentralCounter(locationResult.slug ?? locationResult.location?.slug ?? qr, route).catch(() => undefined);
     }
   }, [location.pathname, location.search, recordQrLocationScan, recordQrScan]);
 }

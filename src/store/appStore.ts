@@ -337,12 +337,14 @@ function qrStatsFromVisits(qrVisits: QrVisit[]) {
   return stats;
 }
 
-function mergeQrLocationsWithDefaults(locations: QrLocation[] | undefined): QrLocation[] {
+function mergeQrLocationsWithDefaults(locations: QrLocation[] | undefined, includeDefaults = true): QrLocation[] {
   const merged = new Map<string, QrLocation>();
 
-  initialQrLocations.forEach((location) => {
-    merged.set(location.slug, location);
-  });
+  if (includeDefaults) {
+    initialQrLocations.forEach((location) => {
+      merged.set(location.slug, location);
+    });
+  }
 
   if (!Array.isArray(locations)) {
     return Array.from(merged.values());
@@ -355,7 +357,7 @@ function mergeQrLocationsWithDefaults(locations: QrLocation[] | undefined): QrLo
       return;
     }
 
-    const defaultLocation = merged.get(slug);
+    const defaultLocation = initialQrLocations.find((item) => item.slug === slug);
     merged.set(slug, {
       ...(defaultLocation ?? {
         id: createId('qr-location'),
@@ -418,7 +420,10 @@ function cleanPersistedAnalytics(persistedState: Partial<AppState>): Partial<App
     ...persistedState,
     qrScans: [...knownQrScans, ...otherQrScans],
     qrVisits,
-    qrLocations: mergeQrLocationsWithDefaults(persistedState.qrLocations),
+    qrLocations: mergeQrLocationsWithDefaults(
+      persistedState.qrLocations,
+      !Array.isArray(persistedState.qrLocations)
+    ),
   };
 
   if (persistedState.metrics) {
@@ -981,7 +986,7 @@ export const useAppStore = create<AppState>()(
           ...currentState,
           ...state,
           adminAuthenticated: hasValidAdminSession(),
-          qrLocations: mergeQrLocationsWithDefaults(state.qrLocations),
+          qrLocations: mergeQrLocationsWithDefaults(state.qrLocations, !Array.isArray(state.qrLocations)),
         };
       },
       partialize: (state) => ({
