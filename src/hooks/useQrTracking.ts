@@ -10,19 +10,23 @@ export function useQrTracking() {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
+    const hasLocationQr = params.has('qr');
     const qr = params.get('qr') ?? params.get('source');
+    const qrName = params.get('qrName') ?? '';
 
     if (!qr) {
       return;
     }
 
     const route = `${location.pathname}${location.search}`;
-    const locationResult = recordQrLocationScan(qr, route);
+    const locationResult = hasLocationQr
+      ? recordQrLocationScan(qr, route, qrName)
+      : ({ counted: false } as ReturnType<typeof recordQrLocationScan>);
+    const counted =
+      locationResult.location || locationResult.external ? locationResult.counted : recordQrScan(qr, route);
 
-    if (!locationResult.location) {
-      recordQrScan(qr, route);
+    if (counted) {
+      void syncQrScanToCentralCounter(locationResult.slug ?? locationResult.location?.slug ?? qr).catch(() => undefined);
     }
-
-    void syncQrScanToCentralCounter(qr).catch(() => undefined);
   }, [location.pathname, location.search, recordQrLocationScan, recordQrScan]);
 }

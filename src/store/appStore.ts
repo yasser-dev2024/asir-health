@@ -28,7 +28,7 @@ import type {
 } from '../types/domain';
 import { createId, safeUrl, sanitizeList, sanitizeText } from '../utils/security';
 import { logEvent } from '../services/logger';
-import { getOrCreateVisitorId, normalizeQrSource, qrSourceLabel } from '../utils/privacy';
+import { getOrCreateVisitorId, isKnownQrSource, normalizeQrSource, qrSourceLabel } from '../utils/privacy';
 import { uniqueLocationSlug } from '../services/qrLocationService';
 
 type KeywordPayload = Omit<KeywordAnswer, 'id' | 'active' | 'usage' | 'updatedAt'>;
@@ -37,6 +37,7 @@ type ContentPayload = Omit<AwarenessContent, 'id' | 'active' | 'updatedAt'>;
 type SmartEntryConfigPayload = SmartEntryConfig;
 type DoctorAssistantPayload = Omit<DoctorAssistantQuestion, 'id' | 'updatedAt'>;
 type QrLocationPayload = Pick<QrLocation, 'name' | 'description' | 'active'>;
+type QrLocationScanResult = { counted: boolean; location?: QrLocation; slug?: string; external?: boolean };
 
 interface AppState {
   metrics: AdminMetrics;
@@ -84,12 +85,13 @@ interface AppState {
   updateQrLocation: (id: string, payload: QrLocationPayload) => void;
   deleteQrLocation: (id: string) => void;
   toggleQrLocation: (id: string) => void;
-  recordQrLocationScan: (slug: string, route: string) => { counted: boolean; location?: QrLocation };
+  recordQrLocationScan: (slug: string, route: string, locationName?: string) => QrLocationScanResult;
   resetSmartEntry: () => void;
   setSmartEntryCompleted: () => void;
   updateSmartEntryConfig: (config: SmartEntryConfigPayload) => void;
   login: (email: string, password: string) => boolean;
   logout: () => void;
+  refreshAdminSession: () => boolean;
 }
 
 function cleanKeywordPayload(payload: KeywordPayload): KeywordPayload {
@@ -114,7 +116,7 @@ function cleanEventPayload(payload: EventPayload): EventPayload {
     time: sanitizeText(payload.time),
     audience: sanitizeText(payload.audience),
     category: sanitizeText(payload.category),
-    mapUrl: safeUrl(payload.mapUrl),
+    mapUrl: safeUrl(payload.mapUrl, { allowRelative: false, allowedProtocols: ['https:'] }),
   };
 }
 
@@ -125,7 +127,7 @@ function cleanContentPayload(payload: ContentPayload): ContentPayload {
     summary: sanitizeText(payload.summary),
     category: sanitizeText(payload.category),
     actionLabel: sanitizeText(payload.actionLabel),
-    fileUrl: safeUrl(payload.fileUrl),
+    fileUrl: safeUrl(payload.fileUrl, { allowRelative: true, allowedProtocols: ['https:'] }),
   };
 }
 
@@ -140,11 +142,11 @@ function cleanDoctorAssistantPayload(payload: DoctorAssistantPayload): DoctorAss
 }
 
 function cleanQrLocationPayload(payload: QrLocationPayload): QrLocationPayload {
-  const name = sanitizeText(payload.name).trim();
+  const name = sanitizeText(payload.name, 80).trim();
 
   return {
     name: name || 'منطقة جديدة',
-    description: sanitizeText(payload.description).trim(),
+    description: sanitizeText(payload.description, 220).trim(),
     active: Boolean(payload.active),
   };
 }
@@ -173,7 +175,7 @@ function cleanSmartEntryConfig(config: SmartEntryConfigPayload): SmartEntryConfi
     facilityOptions: config.facilityOptions.map((option) => ({
       id: sanitizeText(option.id),
       label: sanitizeText(option.label),
-      mapUrl: safeUrl(option.mapUrl),
+      mapUrl: safeUrl(option.mapUrl, { allowRelative: true, allowedProtocols: ['https:'] }),
       active: Boolean(option.active),
     })),
     tripOptions: config.tripOptions.map((option) => ({
@@ -185,8 +187,8 @@ function cleanSmartEntryConfig(config: SmartEntryConfigPayload): SmartEntryConfi
       healthNotice: sanitizeText(option.healthNotice),
       tips: sanitizeList(option.tips),
       ctaLabel: sanitizeText(option.ctaLabel),
-      mapUrl: safeUrl(option.mapUrl),
-      route: safeUrl(option.route) || '/',
+      mapUrl: safeUrl(option.mapUrl, { allowRelative: true, allowedProtocols: ['https:'] }),
+      route: safeUrl(option.route, { allowRelative: true, allowedProtocols: [] }) || '/',
       call937: Boolean(option.call937),
     })),
   };
@@ -196,8 +198,18 @@ function increaseMetric(metrics: AdminMetrics, key: keyof AdminMetrics, amount =
   return { ...metrics, [key]: metrics[key] + amount };
 }
 
-const QR_REPEAT_WINDOW_MS = 10 * 60 * 1000;
+const QR_REPEAT_WINDOW_MS = 0;
 const STORE_VERSION = 3;
+const ADMIN_SESSION_KEY = 'saif-seha-admin-session';
+const ADMIN_LOGIN_ATTEMPTS_KEY = 'saif-seha-admin-login-attempts';
+const ADMIN_SESSION_TTL_MS = 30 * 60 * 1000;
+const ADMIN_MAX_FAILED_ATTEMPTS = 5;
+const ADMIN_LOCKOUT_MS = 5 * 60 * 1000;
+const ADMIN_EMAIL =
+  ((import.meta.env.APP_ADMIN_EMAIL || import.meta.env.VITE_ADMIN_EMAIL || 'admin@aseer.health.sa') as string)
+    .trim()
+    .toLowerCase();
+const ADMIN_PASSWORD = (import.meta.env.APP_ADMIN_PASSWORD || import.meta.env.VITE_ADMIN_PASSWORD || 'Aseer@2026') as string;
 const SEEDED_METRICS_BASELINE: AdminMetrics = {
   visitors: 18420,
   qrScans: 6940,
@@ -224,6 +236,79 @@ const SEEDED_PASSPORT_POINTS = 80;
 const SEEDED_PASSPORT_SCANS = 3;
 const SEEDED_PASSPORT_ACHIEVEMENTS = new Set(['مسح QR من نقطة الوصول', 'زيارة ممشى صحي', 'قراءة بطاقة توعوية']);
 const SEEDED_PASSPORT_BADGES = new Set(['نشط اليوم', 'محافظ على الترطيب']);
+
+interface AdminLoginAttempts {
+  count: number;
+  lockedUntil: number;
+}
+
+function readAdminSessionExpiresAt(): number {
+  try {
+    const raw = window.sessionStorage.getItem(ADMIN_SESSION_KEY);
+    const parsed = raw ? (JSON.parse(raw) as { expiresAt?: number }) : null;
+    const expiresAt = Number(parsed?.expiresAt || 0);
+
+    if (!expiresAt || expiresAt <= Date.now()) {
+      window.sessionStorage.removeItem(ADMIN_SESSION_KEY);
+      return 0;
+    }
+
+    return expiresAt;
+  } catch {
+    return 0;
+  }
+}
+
+function hasValidAdminSession(): boolean {
+  return readAdminSessionExpiresAt() > Date.now();
+}
+
+function writeAdminSession(): void {
+  window.sessionStorage.setItem(
+    ADMIN_SESSION_KEY,
+    JSON.stringify({ expiresAt: Date.now() + ADMIN_SESSION_TTL_MS })
+  );
+}
+
+function clearAdminSession(): void {
+  window.sessionStorage.removeItem(ADMIN_SESSION_KEY);
+}
+
+function readAdminLoginAttempts(): AdminLoginAttempts {
+  try {
+    const raw = window.localStorage.getItem(ADMIN_LOGIN_ATTEMPTS_KEY);
+    const parsed = raw ? (JSON.parse(raw) as Partial<AdminLoginAttempts>) : {};
+    const lockedUntil = Number(parsed.lockedUntil || 0);
+
+    if (lockedUntil && lockedUntil <= Date.now()) {
+      window.localStorage.removeItem(ADMIN_LOGIN_ATTEMPTS_KEY);
+      return { count: 0, lockedUntil: 0 };
+    }
+
+    return {
+      count: Math.max(0, Number(parsed.count || 0)),
+      lockedUntil,
+    };
+  } catch {
+    return { count: 0, lockedUntil: 0 };
+  }
+}
+
+function recordFailedAdminLogin(): void {
+  const attempts = readAdminLoginAttempts();
+  const count = attempts.count + 1;
+  const lockedUntil = count >= ADMIN_MAX_FAILED_ATTEMPTS ? Date.now() + ADMIN_LOCKOUT_MS : 0;
+  window.localStorage.setItem(ADMIN_LOGIN_ATTEMPTS_KEY, JSON.stringify({ count, lockedUntil }));
+}
+
+function clearFailedAdminLogins(): void {
+  window.localStorage.removeItem(ADMIN_LOGIN_ATTEMPTS_KEY);
+}
+
+export function getAdminLoginLockRemainingSeconds(): number {
+  const attempts = readAdminLoginAttempts();
+  return Math.max(0, Math.ceil((attempts.lockedUntil - Date.now()) / 1000));
+}
 
 function subtractBaseline(value: number | undefined, baseline: number): number {
   return Math.max(0, Number(value || 0) - baseline);
@@ -392,7 +477,7 @@ export const useAppStore = create<AppState>()(
       smartEntryCompleted: false,
       journeyAnswers: null,
       savedPlan: false,
-      adminAuthenticated: false,
+      adminAuthenticated: hasValidAdminSession(),
       splashSeen: false,
       setSplashSeen: () => set({ splashSeen: true }),
       setJourneyAnswers: (answers) => {
@@ -574,6 +659,7 @@ export const useAppStore = create<AppState>()(
         }),
       addPassportPoints: (points, label) =>
         set((state) => {
+          const safePoints = Number.isFinite(points) ? Math.max(-500, Math.min(500, Math.trunc(points))) : 0;
           const cleanLabel = sanitizeText(label);
           const achievements = state.passport.achievements.includes(cleanLabel)
             ? state.passport.achievements
@@ -582,8 +668,8 @@ export const useAppStore = create<AppState>()(
           return {
             passport: {
               ...state.passport,
-              points: Math.max(0, state.passport.points + points),
-              scans: points > 0 && cleanLabel.includes('QR') ? state.passport.scans + 1 : state.passport.scans,
+              points: Math.max(0, state.passport.points + safePoints),
+              scans: safePoints > 0 && cleanLabel.includes('QR') ? state.passport.scans + 1 : state.passport.scans,
               achievements,
             },
           };
@@ -633,21 +719,75 @@ export const useAppStore = create<AppState>()(
             location.id === id ? { ...location, active: !location.active } : location
           ),
         })),
-      recordQrLocationScan: (slug, route) => {
+      recordQrLocationScan: (slug, route, locationName = '') => {
         const visitorId = getOrCreateVisitorId();
-        const cleanSlug = sanitizeText(slug).trim().toLowerCase();
-        const cleanRoute = sanitizeText(route || window.location.pathname || '/');
+        const cleanSlug = sanitizeText(slug, 80).trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+        const cleanLocationName = sanitizeText(locationName, 80);
+        const cleanRoute = sanitizeText(route || window.location.pathname || '/', 300);
         const timestamp = new Date().toISOString();
-        let result: { counted: boolean; location?: QrLocation } = { counted: false };
+        let result: QrLocationScanResult = { counted: false };
 
         set((state) => {
           const location = state.qrLocations.find((item) => item.slug === cleanSlug);
 
           if (!location) {
+            if (!cleanSlug || isKnownQrSource(normalizeQrSource(slug))) {
+              return { visitorId };
+            }
+
+            result = { counted: false, slug: cleanSlug, external: true };
+            const now = new Date(timestamp).getTime();
+            const repeated = state.qrLocationVisits.some(
+              (visit) =>
+                visit.visitorId === visitorId &&
+                visit.slug === cleanSlug &&
+                now - new Date(visit.timestamp).getTime() < QR_REPEAT_WINDOW_MS
+            );
+
+            if (repeated) {
+              logEvent('info', 'external_qr_location_repeated_ignored', { slug: cleanSlug, route: cleanRoute });
+              return { visitorId };
+            }
+
+            const displayName = cleanLocationName || cleanSlug.replace(/-/g, ' ');
+            result = { counted: true, slug: cleanSlug, external: true };
+
+            const qrLocationVisits: QrLocationVisit[] = [
+              {
+                id: createId('qr-location-visit'),
+                visitorId,
+                locationId: `external-${cleanSlug}`,
+                slug: cleanSlug,
+                locationName: displayName,
+                timestamp,
+                route: cleanRoute,
+              },
+              ...state.qrLocationVisits,
+            ].slice(0, 1000);
+
+            logEvent('info', 'external_qr_location_scan_counted_privacy_safe', {
+              slug: cleanSlug,
+              route: cleanRoute,
+            });
+
+            return {
+              visitorId,
+              qrLocationVisits,
+              metrics: increaseMetric(increaseMetric(state.metrics, 'qrScans'), 'visitors'),
+              passport: {
+                ...state.passport,
+                points: state.passport.points + 15,
+                scans: state.passport.scans + 1,
+                achievements: [`Ù…Ø³Ø­ QR Ù…Ù†Ø·Ù‚Ø©: ${displayName}`, ...state.passport.achievements].slice(0, 8),
+              },
+            };
+          }
+
+          if (!cleanSlug) {
             return { visitorId };
           }
 
-          result = { counted: false, location };
+          result = { counted: false, location, slug: cleanSlug };
 
           if (!location.active) {
             logEvent('info', 'qr_location_inactive_ignored', { slug: cleanSlug });
@@ -673,7 +813,7 @@ export const useAppStore = create<AppState>()(
             lastScanAt: timestamp,
           };
 
-          result = { counted: true, location: updatedLocation };
+          result = { counted: true, location: updatedLocation, slug: cleanSlug };
 
           const qrLocationVisits: QrLocationVisit[] = [
             {
@@ -711,9 +851,14 @@ export const useAppStore = create<AppState>()(
       recordQrScan: (source, route) => {
         const visitorId = getOrCreateVisitorId();
         const qrSource = normalizeQrSource(source || 'QR_UNKNOWN');
-        const cleanRoute = sanitizeText(route || window.location.pathname || '/');
+        const cleanRoute = sanitizeText(route || window.location.pathname || '/', 300);
         const timestamp = new Date().toISOString();
         let counted = false;
+
+        if (!isKnownQrSource(qrSource)) {
+          logEvent('warn', 'qr_scan_unknown_ignored', { qrSource });
+          return false;
+        }
 
         set((state) => {
           const now = new Date(timestamp).getTime();
@@ -782,19 +927,36 @@ export const useAppStore = create<AppState>()(
       setSmartEntryCompleted: () => set({ smartEntryCompleted: true }),
       updateSmartEntryConfig: (config) => set({ smartEntryConfig: cleanSmartEntryConfig(config) }),
       login: (email, password) => {
-        const valid = sanitizeText(email) === 'admin@aseer.health.sa' && password === 'Aseer@2026';
+        if (getAdminLoginLockRemainingSeconds() > 0) {
+          set({ adminAuthenticated: false });
+          logEvent('warn', 'admin_login_locked');
+          return false;
+        }
+
+        const valid = sanitizeText(email, 120).toLowerCase() === ADMIN_EMAIL && password === ADMIN_PASSWORD;
         if (valid) {
+          writeAdminSession();
+          clearFailedAdminLogins();
           set({ adminAuthenticated: true });
           logEvent('info', 'admin_login_success');
         } else {
-          logEvent('warn', 'admin_login_failed', { email: sanitizeText(email) });
+          clearAdminSession();
+          recordFailedAdminLogin();
+          set({ adminAuthenticated: false });
+          logEvent('warn', 'admin_login_failed');
         }
 
         return valid;
       },
       logout: () => {
+        clearAdminSession();
         set({ adminAuthenticated: false });
         logEvent('info', 'admin_logout');
+      },
+      refreshAdminSession: () => {
+        const valid = hasValidAdminSession();
+        set({ adminAuthenticated: valid });
+        return valid;
       },
     }),
     {
@@ -818,6 +980,7 @@ export const useAppStore = create<AppState>()(
         return {
           ...currentState,
           ...state,
+          adminAuthenticated: hasValidAdminSession(),
           qrLocations: mergeQrLocationsWithDefaults(state.qrLocations),
         };
       },
@@ -837,7 +1000,6 @@ export const useAppStore = create<AppState>()(
         smartEntryCompleted: state.smartEntryCompleted,
         journeyAnswers: state.journeyAnswers,
         savedPlan: state.savedPlan,
-        adminAuthenticated: state.adminAuthenticated,
         splashSeen: state.splashSeen,
       }),
     }

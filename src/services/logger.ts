@@ -17,8 +17,12 @@ export function logEvent(level: LogLevel, message: string, meta?: Record<string,
     ...(meta ? { meta } : {}),
   };
 
-  const current = readLogs();
-  window.localStorage.setItem(key, JSON.stringify([entry, ...current].slice(0, 100)));
+  try {
+    const current = readLogs();
+    window.localStorage.setItem(key, JSON.stringify([entry, ...current].slice(0, 100)));
+  } catch {
+    // Logging must never break the user flow.
+  }
 }
 
 export function readLogs(): LogEntry[] {

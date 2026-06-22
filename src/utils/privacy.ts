@@ -1,4 +1,5 @@
 const VISITOR_ID_KEY = 'saif-seha-visitor-id';
+const VISITOR_ID_PATTERN = /^visitor_[a-zA-Z0-9._-]{8,140}$/;
 
 const qrAliases: Record<string, string> = {
   airport: 'QR_AIRPORT',
@@ -23,12 +24,17 @@ export const qrSourceLabels: Record<string, string> = {
 };
 
 function randomSegment(): string {
+  if (typeof crypto !== 'undefined' && 'getRandomValues' in crypto) {
+    const values = crypto.getRandomValues(new Uint32Array(2));
+    return Array.from(values, (value) => value.toString(36)).join('');
+  }
+
   return Math.random().toString(36).slice(2, 10);
 }
 
 export function getOrCreateVisitorId(): string {
   const existing = window.localStorage.getItem(VISITOR_ID_KEY);
-  if (existing) {
+  if (existing && VISITOR_ID_PATTERN.test(existing)) {
     return existing;
   }
 
@@ -53,4 +59,8 @@ export function normalizeQrSource(value: string): string {
 
 export function qrSourceLabel(source: string): string {
   return qrSourceLabels[source] ?? source.replaceAll('_', ' ');
+}
+
+export function isKnownQrSource(source: string): boolean {
+  return Object.prototype.hasOwnProperty.call(qrSourceLabels, source);
 }

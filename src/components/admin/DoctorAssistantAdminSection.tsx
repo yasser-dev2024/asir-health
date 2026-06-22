@@ -4,6 +4,7 @@ import { Button } from '../ui/Button';
 import { StatusPill } from '../ui/StatusPill';
 import { useAppStore } from '../../store/appStore';
 import type { DoctorAssistantQuestion } from '../../types/domain';
+import { doctorAssistantSchema, validationMessage } from '../../utils/validation';
 
 interface DoctorAssistantForm {
   question: string;
@@ -58,15 +59,16 @@ export function DoctorAssistantAdminSection() {
   const sortedQuestions = [...questions].sort((a, b) => a.order - b.order);
 
   function submit() {
-    if (form.question.trim().length < 3 || form.answer.trim().length < 6) {
-      setError('أضف سؤالًا وإجابة واضحة قبل الحفظ.');
+    const result = doctorAssistantSchema.safeParse(toPayload(form));
+    if (!result.success) {
+      setError(validationMessage(result.error));
       return;
     }
 
     if (editingId) {
-      updateQuestion(editingId, toPayload(form));
+      updateQuestion(editingId, result.data);
     } else {
-      addQuestion(toPayload(form));
+      addQuestion(result.data);
     }
 
     setForm(emptyForm);

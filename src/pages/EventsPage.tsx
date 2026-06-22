@@ -2,6 +2,7 @@ import { CalendarDays, ExternalLink, MapPin, Users } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { PageHeader } from '../components/ui/PageHeader';
 import { useAppStore } from '../store/appStore';
+import { safeUrl } from '../utils/security';
 
 const toneClasses = {
   green: 'from-emerald-600 to-teal-700',
@@ -22,7 +23,10 @@ export function EventsPage() {
         title="برنامج صيف وصحة"
       />
       <div className="grid gap-4 md:grid-cols-2">
-        {events.map((event) => (
+        {events.map((event) => {
+          const mapUrl = safeUrl(event.mapUrl, { allowRelative: false, allowedProtocols: ['https:'] }) || '#';
+
+          return (
           <article className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm" key={event.id}>
             <div className={`h-28 bg-gradient-to-l ${toneClasses[event.tone]} p-4 text-white`}>
               <p className="text-xs font-bold text-white/80">{event.category}</p>
@@ -46,7 +50,7 @@ export function EventsPage() {
               </div>
               <div className="mt-4 flex items-center justify-between gap-3">
                 <p className="text-xs font-bold text-slate-500">{event.visits.toLocaleString('ar-SA')} زيارة</p>
-                <a href={event.mapUrl} rel="noreferrer" target="_blank">
+                <a href={mapUrl} rel="noopener noreferrer" target="_blank">
                   <Button icon={<ExternalLink className="size-4" />} onClick={() => visitEvent(event.id)} variant="secondary">
                     الخريطة
                   </Button>
@@ -54,7 +58,8 @@ export function EventsPage() {
               </div>
             </div>
           </article>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

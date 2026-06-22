@@ -3,6 +3,7 @@ import { Button } from '../components/ui/Button';
 import { PageHeader } from '../components/ui/PageHeader';
 import { useAppStore } from '../store/appStore';
 import type { ContentType } from '../types/domain';
+import { safeUrl } from '../utils/security';
 
 const icons: Record<ContentType, typeof FileText> = {
   post: BookOpen,
@@ -23,6 +24,7 @@ export function DownloadsPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {contents.map((content) => {
           const Icon = icons[content.type];
+          const fileUrl = safeUrl(content.fileUrl) || '#';
 
           return (
             <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" key={content.id}>
@@ -38,7 +40,7 @@ export function DownloadsPage() {
               <p className="mt-2 min-h-20 text-sm leading-7 text-slate-600">{content.summary}</p>
               <div className="mt-4 flex items-center justify-between gap-3">
                 <p className="text-xs font-bold text-slate-500">تحديث {content.updatedAt}</p>
-                <a href={content.fileUrl} rel="noreferrer" target="_blank">
+                <a href={fileUrl} rel="noopener noreferrer" target="_blank">
                   <Button icon={<Download className="size-4" />} variant="secondary">
                     {content.actionLabel}
                   </Button>

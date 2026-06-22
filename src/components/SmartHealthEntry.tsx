@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/Button';
 import { useAppStore } from '../store/appStore';
 import type { AgeGroup, CompanionType, JourneyAnswers, JourneyType, SmartEntryTripOption, VisitorType } from '../types/domain';
+import { safeUrl } from '../utils/security';
 
 interface SmartHealthEntryProps {
   visible: boolean;
@@ -117,13 +118,15 @@ export function SmartHealthEntry({ visible, force = false, onDone }: SmartHealth
   }
 
   function openUrl(url: string, fallbackRoute?: string) {
-    if (url.startsWith('tel:') || url.startsWith('https://') || url.startsWith('mailto:')) {
-      window.location.assign(url);
+    const cleanUrl = safeUrl(url);
+
+    if (cleanUrl.startsWith('tel:') || cleanUrl.startsWith('https://') || cleanUrl.startsWith('mailto:')) {
+      window.location.assign(cleanUrl);
       return;
     }
 
-    if (url.startsWith('/')) {
-      finish(url);
+    if (cleanUrl.startsWith('/')) {
+      finish(cleanUrl);
       return;
     }
 

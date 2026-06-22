@@ -59,6 +59,9 @@ function weekKey(date = new Date()) {
 
 function counterNames(slug: string) {
   const safeSlug = safeCounterName(slug);
+  if (!safeSlug) {
+    return null;
+  }
 
   return {
     total: `qr-${safeSlug}`,
@@ -104,6 +107,10 @@ export async function syncQrScanToCentralCounter(slug: string) {
 
   getOrCreateVisitorId();
   const names = counterNames(slug);
+  if (!names) {
+    return;
+  }
+
   await Promise.allSettled([
     fetchCounter(names.total, 'up'),
     fetchCounter(names.today, 'up'),
@@ -113,6 +120,16 @@ export async function syncQrScanToCentralCounter(slug: string) {
 
 export async function fetchQrCentralStats(slug: string): Promise<QrCentralStats> {
   const names = counterNames(slug);
+  if (!names) {
+    return {
+      total: 0,
+      today: 0,
+      thisWeek: 0,
+      updatedAt: '',
+      available: false,
+    };
+  }
+
   const [total, today, thisWeek] = await Promise.allSettled([
     fetchCounter(names.total),
     fetchCounter(names.today),

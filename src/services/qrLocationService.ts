@@ -1,6 +1,7 @@
 import * as QRCode from 'qrcode';
+import { safeUrl, sanitizeText } from '../utils/security';
 
-const QR_LINK_VERSION = '8';
+const QR_LINK_VERSION = '9';
 
 const knownLocationSlugs = new Map<string, string>([
   ['شارع الفن', 'art-street'],
@@ -10,6 +11,8 @@ const knownLocationSlugs = new Map<string, string>([
   ['السودة متنزه الضباب', 'alswdh-mtnzh-aldbab'],
   ['مصلى العيد', 'msla-alayd'],
 ]);
+
+const reservedQrSourceSlugs = new Set(['airport', 'qr-airport', 'walkway', 'qr-walkway', 'event', 'qr-event', 'booth', 'qr-booth']);
 
 const arabicSlugMap: Record<string, string> = {
   ا: 'a',
@@ -54,6 +57,22 @@ function normalizeBaseUrl(value: string) {
   return value.trim().replace(/\/+$/, '');
 }
 
+function safeConfiguredBaseUrl(value: string) {
+  const cleaned = safeUrl(value, { allowRelative: false, allowedProtocols: ['https:', 'http:'] });
+  if (!cleaned) {
+    return '';
+  }
+
+  const url = new URL(cleaned);
+  const localHttp = url.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
+
+  if (url.protocol !== 'https:' && !localHttp) {
+    return '';
+  }
+
+  return normalizeBaseUrl(url.toString());
+}
+
 export function getAppBaseUrl() {
   const env = import.meta.env as ImportMetaEnv & {
     readonly APP_BASE_URL?: string;
@@ -62,7 +81,10 @@ export function getAppBaseUrl() {
   const configured = env.APP_BASE_URL || env.VITE_APP_BASE_URL;
 
   if (configured) {
-    return normalizeBaseUrl(configured);
+    const safeConfigured = safeConfiguredBaseUrl(configured);
+    if (safeConfigured) {
+      return safeConfigured;
+    }
   }
 
   return normalizeBaseUrl(new URL(import.meta.env.BASE_URL, window.location.origin).toString());
@@ -97,7 +119,7 @@ export function uniqueLocationSlug(name: string, usedSlugs: string[]) {
   let slug = baseSlug;
   let suffix = 2;
 
-  while (used.has(slug)) {
+  while (used.has(slug) || reservedQrSourceSlugs.has(slug)) {
     slug = `${baseSlug}-${suffix}`;
     suffix += 1;
   }
@@ -105,10 +127,16 @@ export function uniqueLocationSlug(name: string, usedSlugs: string[]) {
   return slug;
 }
 
-export function buildQrLocationUrl(slug: string) {
+export function buildQrLocationUrl(slug: string, locationName = '') {
   const baseUrl = getAppBaseUrl();
   const url = new URL(baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`);
   url.searchParams.set('qr', slug);
+  url.searchParams.set('ql', '1');
+  const cleanName = sanitizeText(locationName, 80);
+  if (cleanName) {
+    url.searchParams.set('qrName', cleanName);
+  }
+
   url.searchParams.set('v', QR_LINK_VERSION);
   return url.toString();
 }

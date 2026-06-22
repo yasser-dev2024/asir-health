@@ -3,14 +3,14 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
-import { useAppStore } from '../../store/appStore';
+import { getAdminLoginLockRemainingSeconds, useAppStore } from '../../store/appStore';
 
 export function AdminLoginPage() {
   const navigate = useNavigate();
   const login = useAppStore((state) => state.login);
   const authenticated = useAppStore((state) => state.adminAuthenticated);
-  const [email, setEmail] = useState('admin@aseer.health.sa');
-  const [password, setPassword] = useState('Aseer@2026');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   if (authenticated) {
@@ -19,9 +19,21 @@ export function AdminLoginPage() {
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const lockRemainingSeconds = getAdminLoginLockRemainingSeconds();
+    if (lockRemainingSeconds > 0) {
+      setError(`تم إيقاف محاولات الدخول مؤقتًا. حاول بعد ${Math.ceil(lockRemainingSeconds / 60)} دقيقة.`);
+      return;
+    }
+
     const valid = login(email, password);
     if (valid) {
       navigate('/admin');
+      return;
+    }
+
+    const nextLockRemainingSeconds = getAdminLoginLockRemainingSeconds();
+    if (nextLockRemainingSeconds > 0) {
+      setError(`تم إيقاف محاولات الدخول مؤقتًا. حاول بعد ${Math.ceil(nextLockRemainingSeconds / 60)} دقيقة.`);
       return;
     }
 
@@ -44,8 +56,10 @@ export function AdminLoginPage() {
           <label className="grid gap-2 text-sm font-bold text-slate-700">
             البريد الإلكتروني
             <input
+              autoComplete="username"
               className="min-h-12 rounded-lg border border-slate-200 px-4 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
               onChange={(event) => setEmail(event.target.value)}
+              required
               type="email"
               value={email}
             />
@@ -53,8 +67,10 @@ export function AdminLoginPage() {
           <label className="grid gap-2 text-sm font-bold text-slate-700">
             كلمة المرور
             <input
+              autoComplete="current-password"
               className="min-h-12 rounded-lg border border-slate-200 px-4 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
               onChange={(event) => setPassword(event.target.value)}
+              required
               type="password"
               value={password}
             />

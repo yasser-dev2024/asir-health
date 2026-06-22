@@ -18,6 +18,7 @@ import asirHomeFeature from '../assets/asir-home-feature.png';
 import { Button } from '../components/ui/Button';
 import { useAppStore } from '../store/appStore';
 import type { AgeGroup, CompanionType, CurrentLocation, JourneyAnswers, JourneyType, VisitPurpose } from '../types/domain';
+import { sanitizeText } from '../utils/security';
 
 const journeySignals = [
   { label: 'طبيعة قريبة', value: 'أبها والسودة وممشى الضباب', icon: MapPinned },
@@ -179,13 +180,20 @@ export function HomePage() {
   });
   const recommendations = useMemo(() => buildRecommendations(profile), [profile]);
   const qrWelcomeLocation = useMemo(() => {
-    const slug = new URLSearchParams(routerLocation.search).get('qr')?.trim().toLowerCase();
+    const params = new URLSearchParams(routerLocation.search);
+    const slug = params.get('qr')?.trim().toLowerCase();
 
     if (!slug) {
       return undefined;
     }
 
-    return qrLocations.find((location) => location.slug === slug && location.active);
+    const localLocation = qrLocations.find((location) => location.slug === slug && location.active);
+    if (localLocation) {
+      return localLocation;
+    }
+
+    const qrName = sanitizeText(params.get('qrName') ?? '', 80);
+    return qrName ? { name: qrName } : undefined;
   }, [routerLocation.search, qrLocations]);
 
   function startPersonalPlan() {

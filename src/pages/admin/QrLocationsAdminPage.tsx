@@ -23,6 +23,7 @@ import { fetchQrCentralStats, syncQrScanToCentralCounter, type QrCentralStats } 
 import { buildQrLocationUrl, generateQrPngDataUrl } from '../../services/qrLocationService';
 import { useAppStore } from '../../store/appStore';
 import type { QrLocation } from '../../types/domain';
+import { qrLocationSchema, validationMessage } from '../../utils/validation';
 
 interface QrLocationFormState {
   name: string;
@@ -57,13 +58,13 @@ function sameLocalDay(first: Date, second: Date) {
   );
 }
 
-function QrPreview({ slug }: { slug: string }) {
+function QrPreview({ name, slug }: { name: string; slug: string }) {
   const [src, setSrc] = useState('');
 
   useEffect(() => {
     let mounted = true;
 
-    generateQrPngDataUrl(buildQrLocationUrl(slug), 900)
+    generateQrPngDataUrl(buildQrLocationUrl(slug, name), 900)
       .then((dataUrl) => {
         if (mounted) {
           setSrc(dataUrl);
@@ -78,7 +79,7 @@ function QrPreview({ slug }: { slug: string }) {
     return () => {
       mounted = false;
     };
-  }, [slug]);
+  }, [name, slug]);
 
   if (!src) {
     return (
@@ -218,23 +219,24 @@ export function QrLocationsAdminPage() {
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!form.name.trim()) {
-      setError('أدخل اسم المنطقة أولًا.');
+    const result = qrLocationSchema.safeParse(form);
+    if (!result.success) {
+      setError(validationMessage(result.error));
       return;
     }
 
     if (editingId) {
-      updateQrLocation(editingId, form);
+      updateQrLocation(editingId, result.data);
     } else {
-      addQrLocation(form);
+      addQrLocation(result.data);
     }
 
     resetForm();
     setShowForm(false);
   }
 
-  async function copyLink(slug: string) {
-    const link = buildQrLocationUrl(slug);
+  async function copyLink(location: QrLocation) {
+    const link = buildQrLocationUrl(location.slug, location.name);
 
     try {
       await navigator.clipboard.writeText(link);
@@ -250,12 +252,12 @@ export function QrLocationsAdminPage() {
       document.body.removeChild(textArea);
     }
 
-    setCopiedSlug(slug);
+    setCopiedSlug(location.slug);
     window.setTimeout(() => setCopiedSlug(''), 1600);
   }
 
   async function downloadQr(location: QrLocation) {
-    const dataUrl = await generateQrPngDataUrl(buildQrLocationUrl(location.slug), 1800);
+    const dataUrl = await generateQrPngDataUrl(buildQrLocationUrl(location.slug, location.name), 1800);
     const link = document.createElement('a');
     link.href = dataUrl;
     link.download = `print-qr-${location.slug}.png`;
@@ -470,12 +472,12 @@ export function QrLocationsAdminPage() {
             </thead>
             <tbody>
               {locationsWithStats.map((location) => {
-                const qrLink = buildQrLocationUrl(location.slug);
+                const qrLink = buildQrLocationUrl(location.slug, location.name);
 
                 return (
                   <tr className="border-b border-slate-100 align-top" key={location.id}>
                     <td className="px-3 py-3">
-                      <QrPreview slug={location.slug} />
+                      <QrPreview name={location.name} slug={location.slug} />
                     </td>
                     <td className="px-3 py-3">
                       <p className="font-black text-slate-950">{location.name}</p>
@@ -507,7 +509,7 @@ export function QrLocationsAdminPage() {
                         <Button icon={<Download className="size-4" />} onClick={() => downloadQr(location)} variant="secondary">
                           تحميل للطباعة
                         </Button>
-                        <Button icon={<Copy className="size-4" />} onClick={() => copyLink(location.slug)} variant="secondary">
+                        <Button icon={<Copy className="size-4" />} onClick={() => copyLink(location)} variant="secondary">
                           {copiedSlug === location.slug ? 'تم النسخ' : 'نسخ الرابط'}
                         </Button>
                         <Button icon={<Edit3 className="size-4" />} onClick={() => startEdit(location)} variant="secondary">

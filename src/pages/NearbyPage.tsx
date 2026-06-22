@@ -3,6 +3,7 @@ import { Button } from '../components/ui/Button';
 import { PageHeader } from '../components/ui/PageHeader';
 import { healthCenters, walkways } from '../data/mockData';
 import { useAppStore } from '../store/appStore';
+import { safeUrl } from '../utils/security';
 
 export function NearbyPage() {
   const event = useAppStore((state) => state.events.find((item) => item.active));
@@ -22,6 +23,7 @@ export function NearbyPage() {
     shade: 'مناسب للمشي الخفيف',
     mapUrl: 'https://maps.google.com/?q=Abha+Walkway',
   };
+  const centerMapUrl = safeUrl(center.mapUrl, { allowRelative: false, allowedProtocols: ['https:'] }) || '#';
 
   return (
     <div className="py-4">
@@ -49,7 +51,7 @@ export function NearbyPage() {
                       {center.phone}
                     </Button>
                   </a>
-                  <a href={center.mapUrl} rel="noreferrer" target="_blank">
+                  <a href={centerMapUrl} rel="noopener noreferrer" target="_blank">
                     <Button icon={<ExternalLink className="size-4" />} variant="secondary">
                       الخريطة
                     </Button>

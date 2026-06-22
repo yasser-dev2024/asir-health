@@ -1,4 +1,5 @@
 import { BarChart3, BookOpen, Bot, CalendarDays, HeartPulse, LogOut, QrCode, ShieldCheck, Ticket } from 'lucide-react';
+import { useEffect } from 'react';
 import { NavLink, Navigate, Outlet } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { useAppStore } from '../store/appStore';
@@ -18,6 +19,13 @@ const sections = [
 export function AdminLayout() {
   const authenticated = useAppStore((state) => state.adminAuthenticated);
   const logout = useAppStore((state) => state.logout);
+  const refreshAdminSession = useAppStore((state) => state.refreshAdminSession);
+
+  useEffect(() => {
+    refreshAdminSession();
+    const interval = window.setInterval(refreshAdminSession, 60 * 1000);
+    return () => window.clearInterval(interval);
+  }, [refreshAdminSession]);
 
   if (!authenticated) {
     return <Navigate replace to="/admin/login" />;
