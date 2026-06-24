@@ -3,13 +3,24 @@ import { useLocation } from 'react-router-dom';
 import { syncQrScanToCentralCounter } from '../services/qrAnalyticsService';
 import { useAppStore } from '../store/appStore';
 
+function getHashQueryString(location: ReturnType<typeof useLocation>) {
+  const rawHash = window.location.hash || location.hash || '';
+  const queryIndex = rawHash.indexOf('?');
+  if (queryIndex < 0) {
+    return '';
+  }
+
+  return rawHash.slice(queryIndex + 1);
+}
+
 export function useQrTracking() {
   const location = useLocation();
   const recordQrScan = useAppStore((state) => state.recordQrScan);
   const recordQrLocationScan = useAppStore((state) => state.recordQrLocationScan);
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
+    const search = location.search || getHashQueryString(location);
+    const params = new URLSearchParams(search);
     const hasLocationQr = params.has('qr');
     const qr = params.get('qr') ?? params.get('source');
     const qrName = params.get('qrName') ?? '';
@@ -28,5 +39,5 @@ export function useQrTracking() {
     if (counted) {
       void syncQrScanToCentralCounter(locationResult.slug ?? locationResult.location?.slug ?? qr, route).catch(() => undefined);
     }
-  }, [location.pathname, location.search, recordQrLocationScan, recordQrScan]);
+  }, [location.pathname, location.search, location.hash, recordQrLocationScan, recordQrScan]);
 }
