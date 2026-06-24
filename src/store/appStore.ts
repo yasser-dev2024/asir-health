@@ -1051,8 +1051,8 @@ export const useAppStore = create<AppState>()(
             return false;
           }
 
-          // Any other HTTP error (e.g. 404 on GitHub Pages — no backend) → try local fallback
-          if (checkLocalAdminCredentials(email, password)) {
+          // Any other HTTP error (e.g. 404 on GitHub Pages — no backend) → try local fallback in development only
+          if (import.meta.env.DEV && checkLocalAdminCredentials(email, password)) {
             createLocalAdminSession();
             clearFailedAdminLogins();
             set({ adminAuthenticated: true });
@@ -1066,8 +1066,8 @@ export const useAppStore = create<AppState>()(
           logEvent('warn', 'admin_login_failed');
           return false;
         } catch {
-          // Network error (offline / no backend) → try local fallback
-          if (checkLocalAdminCredentials(email, password)) {
+          // Network error (offline / no backend) → try local fallback in development only
+          if (import.meta.env.DEV && checkLocalAdminCredentials(email, password)) {
             createLocalAdminSession();
             clearFailedAdminLogins();
             set({ adminAuthenticated: true });

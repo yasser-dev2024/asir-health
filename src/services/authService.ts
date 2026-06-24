@@ -11,10 +11,15 @@ const ADMIN_LOGIN_ATTEMPTS_KEY = 'saif-seha-admin-login-attempts';
 const ADMIN_MAX_FAILED_ATTEMPTS = 5;
 const ADMIN_LOCKOUT_MS = 5 * 60 * 1000; // 5 minutes
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000; // 8 hours
+const ENABLE_LOCAL_ADMIN_FALLBACK = import.meta.env.VITE_ENABLE_LOCAL_ADMIN_FALLBACK === 'true';
 
 interface AdminLoginAttempts {
   count: number;
   lockedUntil: number;
+}
+
+function isLocalFallbackAllowed(): boolean {
+  return ENABLE_LOCAL_ADMIN_FALLBACK || import.meta.env.DEV;
 }
 
 /**
@@ -198,19 +203,23 @@ export async function login(rawEmail: string, rawPassword: string): Promise<{
         return { success: false, error: 'البريد الإلكتروني أو كلمة المرور غير صحيحة.' };
       }
     } catch (fetchError) {
-      // Backend unavailable, continue to fallback
-      console.warn('[authService] Backend unavailable, trying local fallback');
+      // Backend unavailable, continue to fallback when explicitly allowed
+      console.warn('[authService] Backend unavailable, checking local fallback', fetchError);
     }
 
-    // Fallback: use local credentials (for GitHub Pages / offline)
-    // Get from environment or hardcoded defaults
-    const FALLBACK_ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || 'admin@aseer.health.sa').toLowerCase().trim();
-    const FALLBACK_ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'Aseer@2026';
+    // Fallback: use local credentials only when allowed
+    const FALLBACK_ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || (import.meta.env.DEV ? 'admin@aseer.health.sa' : '')).toLowerCase().trim();
+    const FALLBACK_ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || (import.meta.env.DEV ? 'Aseer@2026' : '');
 
-    if (email === FALLBACK_ADMIN_EMAIL && password === FALLBACK_ADMIN_PASSWORD) {
+    if (isLocalFallbackAllowed() && email === FALLBACK_ADMIN_EMAIL && password === FALLBACK_ADMIN_PASSWORD) {
       createLocalSession();
       clearFailedLogins();
       return { success: true };
+    }
+
+    if (!isLocalFallbackAllowed()) {
+      clearSessions();
+      return { success: false, error: 'تعذّر الوصول إلى الخادم. حاول مرة أخرى لاحقاً.' };
     }
 
     // Both backend and fallback failed
