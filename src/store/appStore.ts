@@ -217,6 +217,23 @@ const ADMIN_SESSION_KEY = 'saif-seha-admin-session';
 const ADMIN_JWT_KEY = 'admin-jwt-token';
 const ADMIN_LOGIN_ATTEMPTS_KEY = 'saif-seha-admin-login-attempts';
 const ADMIN_MAX_FAILED_ATTEMPTS = 5;
+
+// Local fallback credentials for static deployments (GitHub Pages) where the backend is unavailable.
+// These match the server defaults in server/auth.js.
+const LOCAL_ADMIN_EMAIL = 'admin@aseer.health.sa';
+const LOCAL_ADMIN_PASSWORD = 'Aseer@2026';
+
+function checkLocalAdminCredentials(email: string, password: string): boolean {
+  return (
+    String(email).toLowerCase().trim() === LOCAL_ADMIN_EMAIL &&
+    String(password) === LOCAL_ADMIN_PASSWORD
+  );
+}
+
+function createLocalAdminSession(): void {
+  const expiresAt = Date.now() + 8 * 60 * 60 * 1000; // 8 hours
+  window.sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ expiresAt }));
+}
 const ADMIN_LOCKOUT_MS = 5 * 60 * 1000;
 const SEEDED_METRICS_BASELINE: AdminMetrics = {
   visitors: 18420,
@@ -1012,7 +1029,18 @@ export const useAppStore = create<AppState>()(
             body: JSON.stringify({ email: sanitizeText(email, 120), password }),
           });
 
-          if (!res.ok) {
+          if (res.ok) {
+            const { token, expiresAt } = await res.json() as { token: string; expiresAt: number };
+            window.sessionStorage.setItem(ADMIN_JWT_KEY, token);
+            window.sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ expiresAt }));
+            clearFailedAdminLogins();
+            set({ adminAuthenticated: true });
+            logEvent('info', 'admin_login_success');
+            return true;
+          }
+
+          // 401 = wrong credentials (backend is up but rejected them)
+          if (res.status === 401) {
             clearAdminSession();
             recordFailedAdminLogin();
             set({ adminAuthenticated: false });
@@ -1020,14 +1048,29 @@ export const useAppStore = create<AppState>()(
             return false;
           }
 
-          const { token, expiresAt } = await res.json() as { token: string; expiresAt: number };
-          window.sessionStorage.setItem(ADMIN_JWT_KEY, token);
-          window.sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ expiresAt }));
-          clearFailedAdminLogins();
-          set({ adminAuthenticated: true });
-          logEvent('info', 'admin_login_success');
-          return true;
+          // Any other HTTP error (e.g. 404 on GitHub Pages — no backend) → try local fallback
+          if (checkLocalAdminCredentials(email, password)) {
+            createLocalAdminSession();
+            clearFailedAdminLogins();
+            set({ adminAuthenticated: true });
+            logEvent('info', 'admin_login_local');
+            return true;
+          }
+
+          clearAdminSession();
+          recordFailedAdminLogin();
+          set({ adminAuthenticated: false });
+          logEvent('warn', 'admin_login_failed');
+          return false;
         } catch {
+          // Network error (offline / no backend) → try local fallback
+          if (checkLocalAdminCredentials(email, password)) {
+            createLocalAdminSession();
+            clearFailedAdminLogins();
+            set({ adminAuthenticated: true });
+            logEvent('info', 'admin_login_local');
+            return true;
+          }
           clearAdminSession();
           set({ adminAuthenticated: false });
           return false;
