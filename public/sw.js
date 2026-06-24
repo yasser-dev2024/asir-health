@@ -1,5 +1,5 @@
-// v14 — simplified: never cache HTML or JS/CSS (they're content-hashed)
-const CACHE_NAME = 'saif-seha-musaed-v14';
+// v15 — HashRouter migration: bust all old caches
+const CACHE_NAME = 'saif-seha-musaed-v15';
 
 // Only truly static binary assets worth caching
 const STATIC_ASSETS = [

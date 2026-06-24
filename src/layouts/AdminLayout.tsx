@@ -45,16 +45,8 @@ export function AdminLayout() {
   const isAdminRoot =
     location.pathname === '/admin' || location.pathname === '/admin/';
 
-  // Active section — initialized from URL hash (survives page refresh)
-  const [activeId, setActiveId] = useState<string>(
-    () => location.hash.replace('#', '') || 'dashboard'
-  );
-
-  // Keep active state in sync when location.hash changes via browser nav
-  useEffect(() => {
-    const id = location.hash.replace('#', '') || 'dashboard';
-    setActiveId(id);
-  }, [location.hash]);
+  // Active section — local state only (HashRouter owns window.location.hash)
+  const [activeId, setActiveId] = useState<string>('dashboard');
 
   // Refresh admin session every 60 s
   useEffect(() => {
@@ -81,11 +73,6 @@ export function AdminLayout() {
           if (!visible[0]) return;
           const id = visible[0].target.id;
           setActiveId(id);
-          // Update URL hash without creating a history entry (silent update)
-          const next = id === 'dashboard' ? '#dashboard' : '#' + id;
-          if (window.location.hash !== next) {
-            window.history.replaceState(null, '', next);
-          }
         },
         { threshold: 0.2, rootMargin: '-5% 0px -60% 0px' }
       );
@@ -111,16 +98,16 @@ export function AdminLayout() {
   // Navigate to a section — works from any admin sub-route
   function goToSection(id: string) {
     if (!isAdminRoot) {
-      // From sub-page: navigate to /admin with hash; AdminDashboardPage will scroll
-      navigate('/admin#' + id);
+      // From sub-page: go back to admin root, then scroll
+      navigate('/admin');
+      // Scroll after navigation settles
+      setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setActiveId(id);
+      }, 100);
     } else {
-      // Already on admin page: scroll + update state + update URL silently
       document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setActiveId(id);
-      const next = '#' + id;
-      if (window.location.hash !== next) {
-        window.history.replaceState(null, '', next);
-      }
     }
   }
 
