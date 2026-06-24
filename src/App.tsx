@@ -8,6 +8,21 @@ import { useAppStore } from './store/appStore';
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
 
+// Restore URL from 404.html redirect (GitHub Pages SPA routing)
+const _404redirect = sessionStorage.getItem('spa-404-redirect');
+if (_404redirect) {
+  sessionStorage.removeItem('spa-404-redirect');
+  try {
+    const u = new URL(_404redirect);
+    const relative = u.pathname.startsWith(basePath)
+      ? u.pathname.slice(basePath.length) || '/'
+      : u.pathname;
+    window.history.replaceState(null, '', relative + u.search + u.hash);
+  } catch {
+    // ignore malformed URL
+  }
+}
+
 function getAppPath() {
   const path = window.location.pathname;
 
