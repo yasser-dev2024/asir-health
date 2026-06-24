@@ -27,7 +27,7 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_BASE_PATH: /asir_maaeed/
+          VITE_BASE_PATH: /asir-health/
 
       - name: Add .nojekyll
         run: touch dist/.nojekyll
