@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
+import { RemoteDataProvider } from './components/RemoteDataProvider';
 import { SmartHealthEntry } from './components/SmartHealthEntry';
 import { SplashScreen } from './components/SplashScreen';
 import { AppRoutes } from './routes/AppRoutes';
@@ -36,13 +37,13 @@ function App() {
   }, [setSplashSeen]);
 
   return (
-    <>
+    <RemoteDataProvider>
       <SplashScreen autoClose={!forceSplash} onDone={completeSplash} visible={splashVisible} />
       <BrowserRouter basename={import.meta.env.BASE_URL}>
         <AppRoutes />
         <SmartHealthEntry force={forceEntry} onDone={() => setSmartEntryDone(true)} visible={smartEntryVisible} />
       </BrowserRouter>
-    </>
+    </RemoteDataProvider>
   );
 }
 

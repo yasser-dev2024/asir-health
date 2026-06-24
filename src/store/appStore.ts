@@ -30,6 +30,19 @@ import { createId, safeUrl, sanitizeList, sanitizeText } from '../utils/security
 import { logEvent } from '../services/logger';
 import { getOrCreateVisitorId, isKnownQrSource, normalizeQrSource, qrSourceLabel } from '../utils/privacy';
 import { uniqueLocationSlug } from '../services/qrLocationService';
+import {
+  deleteRemoteContent,
+  deleteRemoteDoctorQuestion,
+  deleteRemoteEvent,
+  deleteRemoteKeyword,
+  deleteRemoteQrLocation,
+  upsertRemoteContent,
+  upsertRemoteDoctorQuestion,
+  upsertRemoteEvent,
+  upsertRemoteKeyword,
+  upsertRemoteQrLocation,
+  upsertRemoteSmartEntryConfig,
+} from '../services/remoteSync';
 
 type KeywordPayload = Omit<KeywordAnswer, 'id' | 'active' | 'usage' | 'updatedAt'>;
 type EventPayload = Omit<HealthEvent, 'id' | 'active' | 'visits' | 'tone'>;
@@ -506,40 +519,50 @@ export const useAppStore = create<AppState>()(
       addKeywordAnswer: (payload) => {
         const cleaned = cleanKeywordPayload(payload);
         logEvent('info', 'keyword_added', { question: cleaned.question });
-        set((state) => ({
-          keywordAnswers: [
-            {
-              ...cleaned,
-              id: createId('kw'),
-              active: true,
-              usage: 0,
-              updatedAt: new Date().toISOString().slice(0, 10),
-            },
-            ...state.keywordAnswers,
-          ],
-        }));
+        let newKeyword: (typeof cleaned & { id: string; active: boolean; usage: number; updatedAt: string }) | undefined;
+        set((state) => {
+          newKeyword = {
+            ...cleaned,
+            id: createId('kw'),
+            active: true,
+            usage: 0,
+            updatedAt: new Date().toISOString().slice(0, 10),
+          };
+          return { keywordAnswers: [newKeyword, ...state.keywordAnswers] };
+        });
+        if (newKeyword) void upsertRemoteKeyword(newKeyword);
       },
       updateKeywordAnswer: (id, payload) => {
         const cleaned = cleanKeywordPayload(payload);
         logEvent('info', 'keyword_updated', { id });
-        set((state) => ({
-          keywordAnswers: state.keywordAnswers.map((answer) =>
-            answer.id === id
-              ? { ...answer, ...cleaned, updatedAt: new Date().toISOString().slice(0, 10) }
-              : answer
-          ),
-        }));
+        let updated: KeywordAnswer | undefined;
+        set((state) => {
+          const keywordAnswers = state.keywordAnswers.map((answer) => {
+            if (answer.id !== id) return answer;
+            updated = { ...answer, ...cleaned, updatedAt: new Date().toISOString().slice(0, 10) };
+            return updated;
+          });
+          return { keywordAnswers };
+        });
+        if (updated) void upsertRemoteKeyword(updated);
       },
       deleteKeywordAnswer: (id) => {
         logEvent('warn', 'keyword_deleted', { id });
+        void deleteRemoteKeyword(id);
         set((state) => ({ keywordAnswers: state.keywordAnswers.filter((answer) => answer.id !== id) }));
       },
-      toggleKeywordAnswer: (id) =>
-        set((state) => ({
-          keywordAnswers: state.keywordAnswers.map((answer) =>
-            answer.id === id ? { ...answer, active: !answer.active } : answer
-          ),
-        })),
+      toggleKeywordAnswer: (id) => {
+        let toggled: KeywordAnswer | undefined;
+        set((state) => {
+          const keywordAnswers = state.keywordAnswers.map((answer) => {
+            if (answer.id !== id) return answer;
+            toggled = { ...answer, active: !answer.active };
+            return toggled;
+          });
+          return { keywordAnswers };
+        });
+        if (toggled) void upsertRemoteKeyword(toggled);
+      },
       recordKeywordUse: (id) =>
         set((state) => ({
           metrics: increaseMetric(state.metrics, 'inquiries'),
@@ -550,98 +573,138 @@ export const useAppStore = create<AppState>()(
       addEvent: (payload) => {
         const tones: HealthEvent['tone'][] = ['green', 'blue', 'rose', 'amber'];
         const cleaned = cleanEventPayload(payload);
-        set((state) => ({
-          events: [
-            {
-              ...cleaned,
-              id: createId('event'),
-              active: true,
-              visits: 0,
-              tone: tones[state.events.length % tones.length] ?? 'green',
-            },
-            ...state.events,
-          ],
-        }));
+        let newEvent: HealthEvent | undefined;
+        set((state) => {
+          newEvent = {
+            ...cleaned,
+            id: createId('event'),
+            active: true,
+            visits: 0,
+            tone: tones[state.events.length % tones.length] ?? 'green',
+          };
+          return { events: [newEvent, ...state.events] };
+        });
+        if (newEvent) void upsertRemoteEvent(newEvent);
       },
       updateEvent: (id, payload) => {
         const cleaned = cleanEventPayload(payload);
-        set((state) => ({
-          events: state.events.map((event) => (event.id === id ? { ...event, ...cleaned } : event)),
-        }));
+        let updated: HealthEvent | undefined;
+        set((state) => {
+          const events = state.events.map((event) => {
+            if (event.id !== id) return event;
+            updated = { ...event, ...cleaned };
+            return updated;
+          });
+          return { events };
+        });
+        if (updated) void upsertRemoteEvent(updated);
       },
-      deleteEvent: (id) => set((state) => ({ events: state.events.filter((event) => event.id !== id) })),
-      toggleEvent: (id) =>
-        set((state) => ({
-          events: state.events.map((event) =>
-            event.id === id ? { ...event, active: !event.active } : event
-          ),
-        })),
+      deleteEvent: (id) => {
+        void deleteRemoteEvent(id);
+        set((state) => ({ events: state.events.filter((event) => event.id !== id) }));
+      },
+      toggleEvent: (id) => {
+        let toggled: HealthEvent | undefined;
+        set((state) => {
+          const events = state.events.map((event) => {
+            if (event.id !== id) return event;
+            toggled = { ...event, active: !event.active };
+            return toggled;
+          });
+          return { events };
+        });
+        if (toggled) void upsertRemoteEvent(toggled);
+      },
       addContent: (payload) => {
         const cleaned = cleanContentPayload(payload);
-        set((state) => ({
-          contents: [
-            {
-              ...cleaned,
-              id: createId('content'),
-              active: true,
-              updatedAt: new Date().toISOString().slice(0, 10),
-            },
-            ...state.contents,
-          ],
-        }));
+        let newContent: AwarenessContent | undefined;
+        set((state) => {
+          newContent = {
+            ...cleaned,
+            id: createId('content'),
+            active: true,
+            updatedAt: new Date().toISOString().slice(0, 10),
+          };
+          return { contents: [newContent, ...state.contents] };
+        });
+        if (newContent) void upsertRemoteContent(newContent);
       },
       updateContent: (id, payload) => {
         const cleaned = cleanContentPayload(payload);
-        set((state) => ({
-          contents: state.contents.map((content) =>
-            content.id === id
-              ? { ...content, ...cleaned, updatedAt: new Date().toISOString().slice(0, 10) }
-              : content
-          ),
-        }));
+        let updated: AwarenessContent | undefined;
+        set((state) => {
+          const contents = state.contents.map((content) => {
+            if (content.id !== id) return content;
+            updated = { ...content, ...cleaned, updatedAt: new Date().toISOString().slice(0, 10) };
+            return updated;
+          });
+          return { contents };
+        });
+        if (updated) void upsertRemoteContent(updated);
       },
-      deleteContent: (id) =>
-        set((state) => ({ contents: state.contents.filter((content) => content.id !== id) })),
-      toggleContent: (id) =>
-        set((state) => ({
-          contents: state.contents.map((content) =>
-            content.id === id ? { ...content, active: !content.active } : content
-          ),
-        })),
+      deleteContent: (id) => {
+        void deleteRemoteContent(id);
+        set((state) => ({ contents: state.contents.filter((content) => content.id !== id) }));
+      },
+      toggleContent: (id) => {
+        let toggled: AwarenessContent | undefined;
+        set((state) => {
+          const contents = state.contents.map((content) => {
+            if (content.id !== id) return content;
+            toggled = { ...content, active: !content.active };
+            return toggled;
+          });
+          return { contents };
+        });
+        if (toggled) void upsertRemoteContent(toggled);
+      },
       addDoctorAssistantQuestion: (payload) => {
         const cleaned = cleanDoctorAssistantPayload(payload);
-        set((state) => ({
-          doctorAssistantQuestions: [
-            {
-              ...cleaned,
-              id: createId('doctor'),
-              updatedAt: new Date().toISOString().slice(0, 10),
-            },
-            ...state.doctorAssistantQuestions,
-          ],
-        }));
+        let newQuestion: DoctorAssistantQuestion | undefined;
+        set((state) => {
+          newQuestion = {
+            ...cleaned,
+            id: createId('doctor'),
+            updatedAt: new Date().toISOString().slice(0, 10),
+          };
+          return { doctorAssistantQuestions: [newQuestion, ...state.doctorAssistantQuestions] };
+        });
+        if (newQuestion) void upsertRemoteDoctorQuestion(newQuestion);
       },
       updateDoctorAssistantQuestion: (id, payload) => {
         const cleaned = cleanDoctorAssistantPayload(payload);
-        set((state) => ({
-          doctorAssistantQuestions: state.doctorAssistantQuestions.map((question) =>
-            question.id === id
-              ? { ...question, ...cleaned, updatedAt: new Date().toISOString().slice(0, 10) }
-              : question
-          ),
-        }));
+        let updated: DoctorAssistantQuestion | undefined;
+        set((state) => {
+          const doctorAssistantQuestions = state.doctorAssistantQuestions.map((question) => {
+            if (question.id !== id) return question;
+            updated = { ...question, ...cleaned, updatedAt: new Date().toISOString().slice(0, 10) };
+            return updated;
+          });
+          return { doctorAssistantQuestions };
+        });
+        if (updated) void upsertRemoteDoctorQuestion(updated);
       },
-      deleteDoctorAssistantQuestion: (id) =>
+      deleteDoctorAssistantQuestion: (id) => {
+        void deleteRemoteDoctorQuestion(id);
         set((state) => ({
           doctorAssistantQuestions: state.doctorAssistantQuestions.filter((question) => question.id !== id),
-        })),
-      toggleDoctorAssistantQuestion: (id) =>
-        set((state) => ({
-          doctorAssistantQuestions: state.doctorAssistantQuestions.map((question) =>
-            question.id === id ? { ...question, active: !question.active } : question
-          ),
-        })),
-      moveDoctorAssistantQuestion: (id, direction) =>
+        }));
+      },
+      toggleDoctorAssistantQuestion: (id) => {
+        let toggled: DoctorAssistantQuestion | undefined;
+        set((state) => {
+          const doctorAssistantQuestions = state.doctorAssistantQuestions.map((question) => {
+            if (question.id !== id) return question;
+            toggled = { ...question, active: !question.active };
+            return toggled;
+          });
+          return { doctorAssistantQuestions };
+        });
+        if (toggled) void upsertRemoteDoctorQuestion(toggled);
+      },
+      moveDoctorAssistantQuestion: (id, direction) => {
+        let q1: DoctorAssistantQuestion | undefined;
+        let q2: DoctorAssistantQuestion | undefined;
         set((state) => {
           const sorted = [...state.doctorAssistantQuestions].sort((a, b) => a.order - b.order);
           const index = sorted.findIndex((question) => question.id === id);
@@ -657,11 +720,16 @@ export const useAppStore = create<AppState>()(
             return {};
           }
 
-          sorted[index] = { ...target, order: current.order };
-          sorted[targetIndex] = { ...current, order: target.order };
+          q1 = { ...target, order: current.order };
+          q2 = { ...current, order: target.order };
+          sorted[index] = q1;
+          sorted[targetIndex] = q2;
 
           return { doctorAssistantQuestions: sorted };
-        }),
+        });
+        if (q1) void upsertRemoteDoctorQuestion(q1);
+        if (q2) void upsertRemoteDoctorQuestion(q2);
+      },
       addPassportPoints: (points, label) =>
         set((state) => {
           const safePoints = Number.isFinite(points) ? Math.max(-500, Math.min(500, Math.trunc(points))) : 0;
@@ -681,10 +749,10 @@ export const useAppStore = create<AppState>()(
         }),
       addQrLocation: (payload) => {
         const cleaned = cleanQrLocationPayload(payload);
-
+        let created: QrLocation | undefined;
         set((state) => {
           const timestamp = new Date().toISOString();
-          const created: QrLocation = {
+          created = {
             id: createId('qr-location'),
             ...cleaned,
             slug: uniqueLocationSlug(cleaned.name, state.qrLocations.map((location) => location.slug)),
@@ -692,38 +760,43 @@ export const useAppStore = create<AppState>()(
             lastScanAt: '',
             createdAt: timestamp,
           };
-
           logEvent('info', 'qr_location_created', { slug: created.slug });
-
-          return {
-            qrLocations: [created, ...state.qrLocations],
-          };
+          return { qrLocations: [created, ...state.qrLocations] };
         });
+        if (created) void upsertRemoteQrLocation(created);
       },
       updateQrLocation: (id, payload) => {
         const cleaned = cleanQrLocationPayload(payload);
-        set((state) => ({
-          qrLocations: state.qrLocations.map((location) =>
-            location.id === id
-              ? {
-                  ...location,
-                  ...cleaned,
-                }
-              : location
-          ),
-        }));
+        let updated: QrLocation | undefined;
+        set((state) => {
+          const qrLocations = state.qrLocations.map((location) => {
+            if (location.id !== id) return location;
+            updated = { ...location, ...cleaned };
+            return updated;
+          });
+          return { qrLocations };
+        });
+        if (updated) void upsertRemoteQrLocation(updated);
       },
-      deleteQrLocation: (id) =>
+      deleteQrLocation: (id) => {
+        void deleteRemoteQrLocation(id);
         set((state) => ({
           qrLocations: state.qrLocations.filter((location) => location.id !== id),
           qrLocationVisits: state.qrLocationVisits.filter((visit) => visit.locationId !== id),
-        })),
-      toggleQrLocation: (id) =>
-        set((state) => ({
-          qrLocations: state.qrLocations.map((location) =>
-            location.id === id ? { ...location, active: !location.active } : location
-          ),
-        })),
+        }));
+      },
+      toggleQrLocation: (id) => {
+        let toggled: QrLocation | undefined;
+        set((state) => {
+          const qrLocations = state.qrLocations.map((location) => {
+            if (location.id !== id) return location;
+            toggled = { ...location, active: !location.active };
+            return toggled;
+          });
+          return { qrLocations };
+        });
+        if (toggled) void upsertRemoteQrLocation(toggled);
+      },
       recordQrLocationScan: (slug, route, locationName = '') => {
         const visitorId = getOrCreateVisitorId();
         const cleanSlug = sanitizeText(slug, 80).trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
@@ -783,7 +856,7 @@ export const useAppStore = create<AppState>()(
                 ...state.passport,
                 points: state.passport.points + 15,
                 scans: state.passport.scans + 1,
-                achievements: [`Ù…Ø³Ø­ QR Ù…Ù†Ø·Ù‚Ø©: ${displayName}`, ...state.passport.achievements].slice(0, 8),
+                achievements: [`مسح QR منطقة: ${displayName}`, ...state.passport.achievements].slice(0, 8),
               },
             };
           }
@@ -930,7 +1003,11 @@ export const useAppStore = create<AppState>()(
       },
       resetSmartEntry: () => set({ smartEntryCompleted: false }),
       setSmartEntryCompleted: () => set({ smartEntryCompleted: true }),
-      updateSmartEntryConfig: (config) => set({ smartEntryConfig: cleanSmartEntryConfig(config) }),
+      updateSmartEntryConfig: (config) => {
+        const cleaned = cleanSmartEntryConfig(config);
+        set({ smartEntryConfig: cleaned });
+        void upsertRemoteSmartEntryConfig(cleaned);
+      },
       login: (email, password) => {
         if (getAdminLoginLockRemainingSeconds() > 0) {
           set({ adminAuthenticated: false });
