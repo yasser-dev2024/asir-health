@@ -5,4 +5,6 @@ interface ImportMetaEnv {
   readonly VITE_APP_BASE_URL?: string;
   readonly APP_QR_COUNTER_NAMESPACE?: string;
   readonly VITE_QR_COUNTER_NAMESPACE?: string;
+  readonly VITE_ADMIN_EMAIL?: string;
+  readonly VITE_ADMIN_PASSWORD?: string;
 }

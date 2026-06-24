@@ -1,49 +1,58 @@
-import { LockKeyhole, ShieldCheck } from 'lucide-react';
+import { Eye, EyeOff, LockKeyhole, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
-import { getAdminLoginLockRemainingSeconds, useAppStore } from '../../store/appStore';
+import { useAppStore } from '../../store/appStore';
+import { login as authServiceLogin, getLoginLockRemainingSeconds } from '../../services/authService';
 
 export function AdminLoginPage() {
   const navigate = useNavigate();
-  const login = useAppStore((state) => state.login);
   const authenticated = useAppStore((state) => state.adminAuthenticated);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   if (authenticated) {
     return <Navigate replace to="/admin" />;
   }
 
-  const [loading, setLoading] = useState(false);
-
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const lockRemainingSeconds = getAdminLoginLockRemainingSeconds();
+    
+    // Check for lockout
+    const lockRemainingSeconds = getLoginLockRemainingSeconds();
     if (lockRemainingSeconds > 0) {
       setError(`تم إيقاف محاولات الدخول مؤقتًا. حاول بعد ${Math.ceil(lockRemainingSeconds / 60)} دقيقة.`);
       return;
     }
 
+    // Prevent duplicate submissions
+    if (loading) return;
+
     setLoading(true);
     setError('');
-    const valid = await login(email, password);
-    setLoading(false);
 
-    if (valid) {
-      navigate('/admin');
-      return;
+    try {
+      const result = await authServiceLogin(email, password);
+      
+      if (result.success) {
+        // Update store
+        useAppStore.setState({ adminAuthenticated: true });
+        navigate('/admin');
+        return;
+      }
+
+      // Show error from service
+      setError(result.error || 'البريد الإلكتروني أو كلمة المرور غير صحيحة.');
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('حدث خطأ أثناء محاولة تسجيل الدخول.');
+    } finally {
+      setLoading(false);
     }
-
-    const nextLockRemainingSeconds = getAdminLoginLockRemainingSeconds();
-    if (nextLockRemainingSeconds > 0) {
-      setError(`تم إيقاف محاولات الدخول مؤقتًا. حاول بعد ${Math.ceil(nextLockRemainingSeconds / 60)} دقيقة.`);
-      return;
-    }
-
-    setError('بيانات الدخول غير صحيحة.');
   }
 
   return (
@@ -72,14 +81,24 @@ export function AdminLoginPage() {
           </label>
           <label className="grid gap-2 text-sm font-bold text-slate-700">
             كلمة المرور
-            <input
-              autoComplete="current-password"
-              className="min-h-12 rounded-lg border border-slate-200 px-4 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
-              onChange={(event) => setPassword(event.target.value)}
-              required
-              type="password"
-              value={password}
-            />
+            <div className="relative">
+              <input
+                autoComplete="current-password"
+                className="w-full min-h-12 rounded-lg border border-slate-200 px-4 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                onChange={(event) => setPassword(event.target.value)}
+                required
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+              >
+                {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+              </button>
+            </div>
           </label>
           {error ? <p className="rounded-lg bg-rose-50 p-3 text-sm font-bold text-rose-700">{error}</p> : null}
           <Button className="w-full" icon={<LockKeyhole className="size-4" />} type="submit" disabled={loading}>
