@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from 'react';
 import { NavLink, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { useAppStore } from '../store/appStore';
+import { useQrTracking } from '../hooks/useQrTracking';
 
 // ── Section definitions ──────────────────────────────────────────────────────
 
@@ -35,6 +36,7 @@ const ROUTE_SECTIONS = [
 // ── Layout ───────────────────────────────────────────────────────────────────
 
 export function AdminLayout() {
+  useQrTracking();
   const authenticated  = useAppStore((s) => s.adminAuthenticated);
   const logout         = useAppStore((s) => s.logout);
   const refreshSession = useAppStore((s) => s.refreshAdminSession);

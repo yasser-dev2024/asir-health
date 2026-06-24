@@ -5,8 +5,10 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import { useAppStore } from '../../store/appStore';
 import { login as authServiceLogin, getLoginLockRemainingSeconds } from '../../services/authService';
+import { useQrTracking } from '../../hooks/useQrTracking';
 
 export function AdminLoginPage() {
+  useQrTracking();
   const navigate = useNavigate();
   const authenticated = useAppStore((state) => state.adminAuthenticated);
   const [email, setEmail] = useState('');

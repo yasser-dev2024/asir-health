@@ -940,9 +940,12 @@ export const useAppStore = create<AppState>()(
         const timestamp = new Date().toISOString();
         let counted = false;
 
-        if (!isKnownQrSource(qrSource)) {
-          logEvent('warn', 'qr_scan_unknown_ignored', { qrSource });
-          return false;
+        // Decide which QR source to use for counting. If unknown, group under
+        // 'QR_UNKNOWN' so that scans via arbitrary QR links (e.g. admin login QR)
+        // are still counted rather than ignored.
+        let usedQrSource = isKnownQrSource(qrSource) ? qrSource : 'QR_UNKNOWN';
+        if (usedQrSource === 'QR_UNKNOWN') {
+          logEvent('warn', 'qr_scan_unknown_recorded', { qrSource });
         }
 
         set((state) => {
@@ -950,7 +953,7 @@ export const useAppStore = create<AppState>()(
           const repeated = state.qrVisits.some(
             (visit) =>
               visit.visitorId === visitorId &&
-              visit.qrSource === qrSource &&
+              visit.qrSource === usedQrSource &&
               now - new Date(visit.timestamp).getTime() < QR_REPEAT_WINDOW_MS
           );
 
@@ -964,25 +967,25 @@ export const useAppStore = create<AppState>()(
             {
               id: createId('qr-visit'),
               visitorId,
-              qrSource,
+              qrSource: usedQrSource,
               timestamp,
               route: cleanRoute,
             },
             ...state.qrVisits,
           ].slice(0, 1000);
 
-          const exists = state.qrScans.some((scan) => scan.source === qrSource);
+          const exists = state.qrScans.some((scan) => scan.source === usedQrSource);
           const qrScans = exists
             ? state.qrScans.map((scan) =>
-                scan.source === qrSource
+                scan.source === usedQrSource
                   ? { ...scan, visits: scan.visits + 1, scannedAt: timestamp, lastRoute: cleanRoute }
                   : scan
               )
             : [
                 {
                   id: createId('qr'),
-                  source: qrSource,
-                  location: qrSourceLabel(qrSource),
+                  source: usedQrSource,
+                  location: qrSourceLabel(usedQrSource),
                   visits: 1,
                   scannedAt: timestamp,
                   lastRoute: cleanRoute,
@@ -990,7 +993,7 @@ export const useAppStore = create<AppState>()(
                 ...state.qrScans,
               ];
 
-          logEvent('info', 'qr_scan_counted_privacy_safe', { qrSource, route: cleanRoute });
+          logEvent('info', 'qr_scan_counted_privacy_safe', { qrSource: usedQrSource, route: cleanRoute });
 
           return {
             visitorId,
