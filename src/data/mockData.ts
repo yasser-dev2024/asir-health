@@ -234,12 +234,21 @@ export const initialDoctorAssistantQuestions: DoctorAssistantQuestion[] = [
     updatedAt: '2026-06-21',
   },
   {
+    id: 'doctor-pharmacy',
+    question: 'كيف أصل لأقرب صيدلية؟',
+    answer: 'افتح خرائط Google وابحث عن "صيدلية قريبة"، أو اتصل بـ 937 ليرشدك لأقرب صيدلية حسب موقعك.',
+    keywords: ['صيدلية', 'دواء', 'أقرب صيدلية', 'صيدليات'],
+    active: true,
+    order: 3,
+    updatedAt: '2026-06-28',
+  },
+  {
     id: 'doctor-hiking',
     question: 'ما نصائح الهايكينج؟',
     answer: 'احرص على أخذ ماء كافٍ، وارتداء حذاء مناسب، واستخدام واقي الشمس، وعدم الذهاب وحدك.',
     keywords: ['هايكينج', 'مسار', 'جبل', 'مشي'],
     active: true,
-    order: 3,
+    order: 4,
     updatedAt: '2026-06-21',
   },
   {
@@ -248,7 +257,7 @@ export const initialDoctorAssistantQuestions: DoctorAssistantQuestion[] = [
     answer: 'استخدم واقي الشمس، واشرب الماء، وتجنب التعرض المباشر للشمس وقت الظهيرة.',
     keywords: ['الشمس', 'واقي الشمس', 'حرارة', 'وقاية'],
     active: true,
-    order: 4,
+    order: 5,
     updatedAt: '2026-06-21',
   },
 ];
