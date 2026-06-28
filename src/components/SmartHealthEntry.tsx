@@ -141,8 +141,8 @@ export function SmartHealthEntry({ visible, force = false, onDone }: SmartHealth
   }
 
   return (
-    <div className="fixed inset-0 z-40 grid h-dvh overflow-x-hidden overflow-y-auto bg-slate-950 text-white">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(251,191,36,0.22),transparent_24%),linear-gradient(180deg,#064e3b,#0f766e_44%,#020617)]" />
+    <div className="fixed inset-0 z-40 grid h-dvh overflow-x-hidden overflow-y-auto bg-[#283A83] text-white">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(47,169,224,0.25),transparent_24%),linear-gradient(180deg,#283A83,#15508A_44%,#020617)]" />
       <span className="home-asir-strip absolute inset-x-0 top-0 h-3" />
       <span className="home-gold-thread absolute top-[24%] left-[-20%] h-0.5 w-[92%] rotate-[-14deg]" />
 
@@ -152,7 +152,7 @@ export function SmartHealthEntry({ visible, force = false, onDone }: SmartHealth
             <BrandLogo className="h-20 w-48" tone="white" />
           </span>
           <div className="min-w-0">
-            <p className="text-xs font-black uppercase tracking-normal text-amber-100">Smart Health Entry</p>
+            <p className="text-xs font-black uppercase tracking-normal text-[#EAF7FC]">Smart Health Entry</p>
             <h1 className="mt-1 text-xl font-black sm:text-2xl">الدخول الصحي الذكي</h1>
           </div>
         </header>
@@ -161,7 +161,7 @@ export function SmartHealthEntry({ visible, force = false, onDone }: SmartHealth
           {step === 'age' ? (
             <section className="w-full">
               <div className="mb-7 text-center">
-                <Sparkles className="mx-auto size-8 text-amber-100" />
+                <Sparkles className="mx-auto size-8 text-[#EAF7FC]" />
                 <h2 className="mt-4 text-3xl font-black leading-tight">ما فئتك العمرية؟</h2>
               </div>
               <div className="grid gap-3">
@@ -184,8 +184,8 @@ export function SmartHealthEntry({ visible, force = false, onDone }: SmartHealth
 
           {step === 'visitor' ? (
             <section className="w-full">
-              <div className="rounded-lg border border-amber-100/24 bg-amber-50/12 p-4 text-center">
-                <ShieldCheck className="mx-auto size-7 text-amber-100" />
+              <div className="rounded-lg border border-[#CCEAF7]/30 bg-[#EAF7FC]/12 p-4 text-center">
+                <ShieldCheck className="mx-auto size-7 text-[#EAF7FC]" />
                 <p className="mt-3 text-lg font-black leading-8">{selectedAgeGroup?.message}</p>
               </div>
               <div className="mt-7 text-center">
@@ -211,11 +211,11 @@ export function SmartHealthEntry({ visible, force = false, onDone }: SmartHealth
 
           {step === 'call937' && callQuestion ? (
             <section className="w-full text-center">
-              <Phone className="mx-auto size-10 text-amber-100" />
+              <Phone className="mx-auto size-10 text-[#EAF7FC]" />
               <h2 className="mt-5 text-4xl font-black leading-tight">{callQuestion.question}</h2>
               <div className="mt-8 grid gap-3">
                 <button
-                  className="min-h-16 rounded-lg bg-amber-100 px-5 text-lg font-black text-emerald-950"
+                  className="min-h-16 rounded-lg bg-[#EAF7FC] px-5 text-lg font-black text-[#283A83] hover:bg-white"
                   onClick={() => {
                     window.location.assign('tel:937');
                     nextAfterCall();
@@ -237,11 +237,11 @@ export function SmartHealthEntry({ visible, force = false, onDone }: SmartHealth
 
           {step === 'nearby' && nearbyQuestion ? (
             <section className="w-full text-center">
-              <MapPinned className="mx-auto size-10 text-amber-100" />
+              <MapPinned className="mx-auto size-10 text-[#EAF7FC]" />
               <h2 className="mt-5 text-4xl font-black leading-tight">{nearbyQuestion.question}</h2>
               <div className="mt-8 grid gap-3">
                 <button
-                  className="min-h-16 rounded-lg bg-amber-100 px-5 text-lg font-black text-emerald-950"
+                  className="min-h-16 rounded-lg bg-[#EAF7FC] px-5 text-lg font-black text-[#283A83] hover:bg-white"
                   onClick={() => setStep('facility')}
                   type="button"
                 >
@@ -275,7 +275,7 @@ export function SmartHealthEntry({ visible, force = false, onDone }: SmartHealth
                   </button>
                 ))}
               </div>
-              <Button className="mt-5 w-full bg-amber-100 text-emerald-950 hover:bg-white" onClick={() => setStep('trip')}>
+              <Button className="mt-5 w-full bg-[#EAF7FC] text-[#283A83] hover:bg-white" onClick={() => setStep('trip')}>
                 أكمل الرحلة
               </Button>
             </section>

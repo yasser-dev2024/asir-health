@@ -125,7 +125,7 @@ export function NearbyPage() {
               مشاركة الموقع
             </Button>
           </section>
-          <section className="relative h-64 overflow-hidden rounded-lg border border-slate-200 bg-[linear-gradient(135deg,#dbeafe,#dcfce7)] shadow-sm">
+          <section className="relative h-64 overflow-hidden rounded-lg border border-slate-200 bg-[linear-gradient(135deg,#F4FAFC,#DFF2FB)] shadow-sm">
             <div className="absolute inset-5 rounded-[2rem] border-2 border-white/70" />
             <div className="absolute right-10 top-8 flex items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm">
               <Navigation className="size-4 text-teal-700" />

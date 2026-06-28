@@ -147,7 +147,7 @@ export function generateQrPngDataUrl(url: string, width = 1600) {
     margin: 4,
     width,
     color: {
-      dark: '#0f766e',
+      dark: '#15508A',
       light: '#ffffff',
     },
   });

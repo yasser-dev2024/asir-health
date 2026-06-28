@@ -444,7 +444,7 @@ export function QrLocationsAdminPage() {
                   </div>
                   <div className="h-3 overflow-hidden rounded-full bg-slate-100">
                     <span
-                      className="block h-full rounded-full bg-[linear-gradient(90deg,#0f766e,#2dd4bf,#fbbf24)] shadow-[0_0_16px_rgba(20,184,166,0.32)]"
+                      className="block h-full rounded-full bg-[linear-gradient(90deg,#15508A,#1691D0,#2FA9E0)] shadow-[0_0_16px_rgba(47,169,224,0.32)]"
                       style={{ width: `${Math.min(100, width)}%` }}
                     />
                   </div>

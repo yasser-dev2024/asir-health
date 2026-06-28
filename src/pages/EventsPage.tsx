@@ -5,10 +5,10 @@ import { useAppStore } from '../store/appStore';
 import { safeUrl } from '../utils/security';
 
 const toneClasses = {
-  green: 'from-emerald-600 to-teal-700',
-  blue: 'from-sky-600 to-cyan-700',
-  rose: 'from-rose-600 to-pink-700',
-  amber: 'from-amber-500 to-orange-600',
+  green: 'from-[#15508A] to-[#057590]',
+  blue: 'from-[#1691D0] to-[#283A83]',
+  rose: 'from-[#283A83] to-[#15508A]',
+  amber: 'from-[#2FA9E0] to-[#15508A]',
 };
 
 export function EventsPage() {

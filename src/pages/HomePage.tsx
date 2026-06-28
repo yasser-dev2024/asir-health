@@ -204,13 +204,13 @@ export function HomePage() {
 
   return (
     <div className="bg-slate-50">
-      <section className="relative isolate overflow-hidden bg-emerald-950 text-white">
+      <section className="relative isolate overflow-hidden bg-[#283A83] text-white">
         <img
           alt="منظر من عسير"
           className="absolute inset-0 h-full w-full object-cover object-center"
           src={asirHomeFeature}
         />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,78,59,0.48),rgba(9,75,78,0.62)_42%,rgba(2,6,23,0.92))]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(21,80,138,0.48),rgba(5,117,144,0.62)_42%,rgba(40,58,131,0.92))]" />
         <div className="home-asir-strip absolute inset-x-0 top-0 h-3" />
         <span className="home-gold-thread absolute top-[22%] left-[-18%] h-0.5 w-[82%] rotate-[-14deg]" />
         <span className="home-gold-thread home-gold-thread-delay absolute bottom-[28%] right-[-22%] h-0.5 w-[92%] rotate-[18deg]" />
@@ -339,7 +339,7 @@ export function HomePage() {
                 className="absolute inset-0 h-full w-full object-cover"
                 src={asirHomeFeature}
               />
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(6,78,59,0.22))]" />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(21,80,138,0.22))]" />
               <span className="home-gold-thread absolute top-10 left-[-20%] h-0.5 w-[96%] rotate-[-12deg]" />
               <span className="home-gold-thread home-gold-thread-delay absolute bottom-16 right-[-22%] h-0.5 w-[92%] rotate-[16deg]" />
             </div>

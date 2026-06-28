@@ -27,7 +27,7 @@ export function AssistantPage() {
       });
   }, [cleanedSearch, questions]);
   return (
-    <div className="fixed inset-0 z-30 flex h-dvh w-screen max-w-full flex-col overflow-hidden bg-slate-50 text-slate-950">
+    <div className="fixed inset-0 z-30 flex h-dvh w-full flex-col overflow-hidden bg-slate-50 text-slate-950">
       <header className="border-b border-slate-200 bg-white px-4 pb-4 pt-[calc(env(safe-area-inset-top)+1rem)] shadow-sm">
         <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-3 overflow-hidden" dir="ltr">
           <span className="order-3 grid size-16 shrink-0 place-items-end overflow-hidden rounded-full bg-teal-50 ring-2 ring-teal-100 shadow-lg shadow-teal-950/10">
@@ -55,7 +55,7 @@ export function AssistantPage() {
         <label className="relative block">
           <Search className="pointer-events-none absolute right-4 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
           <input
-            className="min-h-14 w-full rounded-lg border border-slate-200 bg-white pr-12 pl-4 text-base font-bold outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+            className="min-h-14 w-full rounded-lg border border-slate-200 bg-white pr-12 pl-4 text-right text-base font-bold outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
             onChange={(event) => {
               setSearch(event.target.value);
               setSelectedId(null);
@@ -80,7 +80,7 @@ export function AssistantPage() {
                       onClick={() => setSelectedId(selected ? null : question.id)}
                       type="button"
                     >
-                      <span>{question.question}</span>
+                      <span className="min-w-0 flex-1 whitespace-normal break-words">{question.question}</span>
                     </button>
                     {selected ? (
                       <div className="border-t border-teal-100 bg-teal-50 p-4">

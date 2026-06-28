@@ -91,7 +91,7 @@ export function PlanPage() {
               </div>
               <span className="text-xs font-bold text-slate-500">محاكاة تفاعلية</span>
             </div>
-            <div className="relative h-64 bg-[linear-gradient(135deg,#e0f2fe,#ecfdf5)]">
+            <div className="relative h-64 bg-[linear-gradient(135deg,#F4FAFC,#DFF2FB)]">
               <div className="absolute inset-x-6 top-1/2 h-2 -translate-y-1/2 rounded-full bg-white shadow-inner" />
               {plan.mapNotes.map((note, index) => (
                 <div
