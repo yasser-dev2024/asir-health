@@ -1,6 +1,7 @@
-import { HeartPulse, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import asirSplashView from '../assets/asir-splash-view.png';
+import { BrandLogo } from './BrandLogo';
 import { Button } from './ui/Button';
 
 interface SplashScreenProps {
@@ -73,14 +74,19 @@ export function SplashScreen({ visible, onDone, autoClose = true }: SplashScreen
       <span className="splash-glint splash-glint-three" />
 
       <div className="relative grid h-dvh place-items-center px-5 pb-[calc(env(safe-area-inset-bottom)+2rem)] pt-[calc(env(safe-area-inset-top)+2rem)]">
-        <div className="splash-clear-panel w-full max-w-sm text-center">
-          <div className="splash-float relative mx-auto grid size-28 place-items-center rounded-[2rem] border border-white/70 bg-gradient-to-br from-teal-500 via-emerald-500 to-amber-300 shadow-2xl shadow-teal-950/20">
-            <span className="splash-pulse absolute size-28 rounded-[2rem] border border-white/70" />
-            <span className="splash-heart-glow absolute inset-3 rounded-[1.45rem]" />
-            <HeartPulse className="relative size-14 text-white drop-shadow" strokeWidth={2.5} />
+        <div className="splash-clear-panel w-full max-w-lg text-center">
+          <div className="splash-brand-entrance relative mx-auto grid h-48 w-[min(90vw,28rem)] place-items-center sm:h-60">
+            <span className="splash-logo-halo splash-logo-halo-one" />
+            <span className="splash-logo-halo splash-logo-halo-two" />
+            <span className="splash-pulse absolute h-32 w-64 rounded-full border border-white/60 sm:h-40 sm:w-80" />
+            <BrandLogo
+              className="splash-logo-mark relative z-10 h-full w-full"
+              imageClassName="drop-shadow-[0_16px_38px_rgba(2,6,23,0.78)]"
+              tone="asir-white"
+            />
           </div>
 
-          <div className="splash-welcome-burst mt-6 inline-flex items-center gap-2 rounded-full border border-emerald-100/80 bg-white/78 px-6 py-3 text-2xl font-black text-emerald-950 shadow-[0_0_40px_rgba(45,212,191,0.32)]">
+          <div className="splash-welcome-burst mt-2 inline-flex items-center gap-2 rounded-full border border-emerald-100/80 bg-white/78 px-6 py-3 text-2xl font-black text-emerald-950 shadow-[0_0_40px_rgba(45,212,191,0.32)]">
             <Sparkles className="size-5 text-amber-500" />
             <span className="inline-flex flex-row items-baseline gap-2" dir="rtl">
               <span dir="rtl">مرحبا</span>

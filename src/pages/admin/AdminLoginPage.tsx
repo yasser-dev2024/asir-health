@@ -1,7 +1,8 @@
-import { Eye, EyeOff, LockKeyhole, ShieldCheck } from 'lucide-react';
+import { Eye, EyeOff, LockKeyhole } from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
+import { BrandLogo } from '../../components/BrandLogo';
 import { Button } from '../../components/ui/Button';
 import { useAppStore } from '../../store/appStore';
 import { login as authServiceLogin, getLoginLockRemainingSeconds } from '../../services/authService';
@@ -58,12 +59,18 @@ export function AdminLoginPage() {
   }
 
   return (
-    <main className="grid min-h-dvh place-items-center bg-slate-950 px-4 py-8 text-white">
-      <section className="w-full max-w-md rounded-lg border border-white/10 bg-white p-5 text-slate-950 shadow-2xl shadow-slate-950/40">
-        <div className="flex items-center gap-3">
-          <span className="grid size-12 place-items-center rounded-lg bg-teal-700 text-white">
-            <ShieldCheck className="size-6" />
-          </span>
+    <main className="relative isolate grid min-h-dvh place-items-center overflow-hidden bg-slate-950 px-4 py-8 text-white">
+      <BrandLogo
+        className="pointer-events-none absolute -top-10 left-1/2 h-52 w-96 -translate-x-1/2 opacity-10"
+        tone="white"
+      />
+      <BrandLogo
+        className="pointer-events-none absolute -bottom-14 right-[-4rem] h-56 w-[28rem] opacity-[0.07]"
+        tone="white"
+      />
+      <section className="relative w-full max-w-md rounded-lg border border-white/10 bg-white p-5 text-slate-950 shadow-2xl shadow-slate-950/40">
+        <div className="grid justify-items-center gap-2 text-center">
+          <BrandLogo className="h-20 w-36" />
           <div>
             <h1 className="text-xl font-black">بوابة الإدارة</h1>
             <p className="text-sm font-bold text-slate-500">صيف وصحة - مساعد</p>

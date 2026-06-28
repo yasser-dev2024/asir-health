@@ -7,11 +7,11 @@ import {
   HeartPulse,
   LogOut,
   QrCode,
-  ShieldCheck,
   Ticket,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { BrandLogo } from '../components/BrandLogo';
 import { Button } from '../components/ui/Button';
 import { useAppStore } from '../store/appStore';
 import { useQrTracking } from '../hooks/useQrTracking';
@@ -182,9 +182,7 @@ export function AdminLayout() {
       {/* ── Mobile top bar ──────────────────────────────────────────────────── */}
       <div className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur-sm lg:hidden">
         <div className="flex items-center gap-3 px-4 py-3">
-          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-slate-950 text-white">
-            <ShieldCheck className="size-4" />
-          </span>
+          <BrandLogo className="h-10 w-20 shrink-0" />
           <span className="text-sm font-black text-slate-900">لوحة التحكم</span>
           <button
             className="mr-auto flex items-center gap-1.5 rounded-xl bg-slate-100 px-3 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-200"
@@ -229,9 +227,7 @@ export function AdminLayout() {
 
             {/* Brand */}
             <div className="flex items-center gap-3 rounded-xl p-2">
-              <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-slate-950 text-white shadow-lg shadow-slate-950/20">
-                <ShieldCheck className="size-5" />
-              </span>
+              <BrandLogo className="h-14 w-24 shrink-0" />
               <div>
                 <p className="text-base font-black text-slate-950">لوحة التحكم</p>
                 <p className="text-xs font-bold text-emerald-700">بوابة الإدارة</p>

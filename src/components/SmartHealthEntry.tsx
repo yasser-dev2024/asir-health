@@ -1,6 +1,7 @@
-import { ArrowLeft, HeartPulse, MapPinned, Phone, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowLeft, MapPinned, Phone, ShieldCheck, Sparkles } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { BrandLogo } from './BrandLogo';
 import { Button } from './ui/Button';
 import { useAppStore } from '../store/appStore';
 import type { AgeGroup, CompanionType, JourneyAnswers, JourneyType, SmartEntryTripOption, VisitorType } from '../types/domain';
@@ -140,20 +141,18 @@ export function SmartHealthEntry({ visible, force = false, onDone }: SmartHealth
   }
 
   return (
-    <div className="fixed inset-0 z-40 grid h-dvh overflow-y-auto bg-slate-950 text-white">
+    <div className="fixed inset-0 z-40 grid h-dvh overflow-x-hidden overflow-y-auto bg-slate-950 text-white">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(251,191,36,0.22),transparent_24%),linear-gradient(180deg,#064e3b,#0f766e_44%,#020617)]" />
       <span className="home-asir-strip absolute inset-x-0 top-0 h-3" />
       <span className="home-gold-thread absolute top-[24%] left-[-20%] h-0.5 w-[92%] rotate-[-14deg]" />
 
-      <div className="smart-entry-card relative mx-auto flex min-h-full w-full max-w-md flex-col overflow-y-auto px-5 pb-[calc(env(safe-area-inset-bottom)+1.35rem)] pt-[calc(env(safe-area-inset-top)+1.35rem)]">
-        <header className="flex items-center justify-between gap-3">
-          <div>
+      <div className="smart-entry-card relative mx-auto flex min-h-full w-full max-w-md flex-col overflow-x-hidden overflow-y-auto px-5 pb-[calc(env(safe-area-inset-bottom)+1.35rem)] pt-[calc(env(safe-area-inset-top)+1.35rem)]">
+        <header className="flex items-center justify-between gap-3 pr-16 sm:pr-0">
+          <div className="min-w-0">
             <p className="text-xs font-black uppercase tracking-normal text-amber-100">Smart Health Entry</p>
-            <h1 className="mt-1 text-2xl font-black">الدخول الصحي الذكي</h1>
+            <h1 className="mt-1 text-xl font-black sm:text-2xl">الدخول الصحي الذكي</h1>
           </div>
-          <span className="grid size-12 place-items-center rounded-lg border border-amber-100/25 bg-white/12">
-            <HeartPulse className="size-6 text-amber-100" />
-          </span>
+          <BrandLogo className="h-14 w-24 shrink-0" tone="white" />
         </header>
 
         <main className="grid flex-1 place-items-center py-7">

@@ -1,5 +1,6 @@
 import { Activity, Bot, CalendarDays, Download, Home, MapPinned, Route, Ticket } from 'lucide-react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { BrandLogo } from '../components/BrandLogo';
 import { FloatingNowButton } from '../components/FloatingNowButton';
 import { DoctorAssistantFloatingButton } from '../components/DoctorAssistantFloatingButton';
 import { useQrTracking } from '../hooks/useQrTracking';
@@ -27,11 +28,9 @@ export function ClientLayout() {
     <div className="min-h-dvh bg-slate-50 text-slate-900">
       <header className="sticky top-0 z-20 border-b border-white/60 bg-white/90 backdrop-blur">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4">
-          <NavLink className="flex items-center gap-3" to="/">
-            <span className="grid size-10 place-items-center rounded-lg bg-teal-700 text-white">
-              <Activity className="size-5" />
-            </span>
-            <span>
+          <NavLink className="flex min-w-0 items-center gap-3" to="/">
+            <BrandLogo className="h-12 w-24 shrink-0 sm:h-14 sm:w-28" />
+            <span className="min-w-0">
               <span className="block text-base font-black leading-5">صيف وصحة</span>
               <span className="block text-xs font-bold text-teal-700">مساعد عسير</span>
             </span>

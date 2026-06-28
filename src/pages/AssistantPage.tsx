@@ -2,6 +2,7 @@ import { Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import doctorImage from '../assets/doctor.png';
+import { BrandLogo } from '../components/BrandLogo';
 import { useAppStore } from '../store/appStore';
 
 export function AssistantPage() {
@@ -27,18 +28,19 @@ export function AssistantPage() {
   }, [cleanedSearch, questions]);
   return (
     <div className="fixed inset-0 z-30 flex h-dvh flex-col overflow-hidden bg-slate-50 text-slate-950">
-      <header className="border-b border-slate-200 bg-white px-4 pb-4 pt-[calc(env(safe-area-inset-top)+1rem)] shadow-sm">
-        <div className="mx-auto flex max-w-3xl items-center gap-3">
-          <span className="grid size-16 shrink-0 place-items-end overflow-hidden rounded-full bg-teal-50 ring-2 ring-teal-100">
-            <img alt="الدكتور مساعد" className="h-20 w-16 object-cover object-top" src={doctorImage} />
+      <header className="border-b border-slate-200 bg-white pl-4 pr-12 pb-4 pt-[calc(env(safe-area-inset-top)+1rem)] shadow-sm sm:px-4">
+        <div className="relative mx-auto min-h-16 w-full max-w-3xl overflow-hidden">
+          <span className="absolute right-8 top-1/2 grid size-14 -translate-y-1/2 place-items-end overflow-hidden rounded-full bg-teal-50 ring-2 ring-teal-100 sm:size-16">
+            <img alt="الدكتور مساعد" className="h-[4.5rem] w-14 object-cover object-top sm:h-20 sm:w-16" src={doctorImage} />
           </span>
-          <div className="min-w-0 flex-1">
-            <h1 className="text-2xl font-black text-slate-950">الدكتور مساعد</h1>
-            <p className="mt-1 text-sm font-bold text-teal-700">مساعدك الصحي الذكي</p>
+          <div className="min-w-0 pr-24 pl-32 sm:pr-20 sm:pl-40">
+            <h1 className="text-xl font-black text-slate-950 sm:text-2xl">الدكتور مساعد</h1>
+            <p className="mt-1 text-xs font-bold text-teal-700 sm:text-sm">مساعدك الصحي الذكي</p>
           </div>
+          <BrandLogo className="absolute left-16 top-1/2 h-9 w-16 -translate-y-1/2 sm:h-12 sm:w-24" />
           <button
             aria-label="إغلاق"
-            className="grid size-11 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-600 transition hover:bg-slate-200"
+            className="absolute left-0 top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-lg bg-slate-100 text-slate-600 transition hover:bg-slate-200"
             onClick={() => navigate(-1)}
             type="button"
           >
