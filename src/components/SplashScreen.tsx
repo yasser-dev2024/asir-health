@@ -75,12 +75,16 @@ export function SplashScreen({ visible, onDone, autoClose = true }: SplashScreen
 
       <div className="relative grid h-dvh place-items-center px-5 pb-[calc(env(safe-area-inset-bottom)+2rem)] pt-[calc(env(safe-area-inset-top)+2rem)]">
         <div className="splash-clear-panel w-full max-w-lg text-center">
-          <div className="splash-brand-entrance relative mx-auto grid h-48 w-[min(90vw,28rem)] place-items-center sm:h-60">
+          <div className="splash-brand-entrance splash-logo-stage relative mx-auto mb-3 grid h-40 w-[min(88vw,28rem)] place-items-center sm:h-64">
+            <span className="splash-logo-ray splash-logo-ray-one" />
+            <span className="splash-logo-ray splash-logo-ray-two" />
+            <span className="splash-logo-ray splash-logo-ray-three" />
             <span className="splash-logo-halo splash-logo-halo-one" />
             <span className="splash-logo-halo splash-logo-halo-two" />
             <span className="splash-pulse absolute h-32 w-64 rounded-full border border-white/60 sm:h-40 sm:w-80" />
+            <span className="splash-logo-shine" />
             <BrandLogo
-              className="splash-logo-mark relative z-10 h-full w-full"
+              className="splash-logo-mark relative z-10 h-36 w-64 sm:h-56 sm:w-80"
               imageClassName="drop-shadow-[0_16px_38px_rgba(2,6,23,0.78)]"
               tone="asir-white"
             />

@@ -26,10 +26,12 @@ export function ClientLayout() {
 
   return (
     <div className="min-h-dvh bg-slate-50 text-slate-900">
-      <header className="sticky top-0 z-20 border-b border-white/60 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4">
+      <header className="sticky top-0 z-20 border-b border-teal-100/70 bg-white/95 shadow-sm shadow-slate-950/5 backdrop-blur">
+        <div className="mx-auto flex h-20 w-full max-w-6xl items-center justify-between px-4">
           <NavLink className="flex min-w-0 items-center gap-3" to="/">
-            <BrandLogo className="h-12 w-24 shrink-0 sm:h-14 sm:w-28" />
+            <span className="grid h-16 w-36 shrink-0 place-items-center rounded-xl border border-teal-100 bg-white px-2 shadow-md shadow-teal-950/8">
+              <BrandLogo className="h-14 w-32" />
+            </span>
             <span className="min-w-0">
               <span className="block text-base font-black leading-5">صيف وصحة</span>
               <span className="block text-xs font-bold text-teal-700">مساعد عسير</span>

@@ -217,10 +217,12 @@ export function HomePage() {
 
         <div className="relative mx-auto grid min-h-[calc(100dvh-4rem)] w-full max-w-6xl content-end gap-5 px-4 pb-28 pt-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-end lg:pb-14">
           <div className="pb-2">
-            <BrandLogo
-              className="mb-5 h-28 w-52 drop-shadow-[0_14px_32px_rgba(2,6,23,0.5)] sm:h-32 sm:w-60"
-              tone="white"
-            />
+            <span className="mb-5 inline-grid h-32 w-64 place-items-center rounded-2xl border border-white/22 bg-slate-950/22 px-4 shadow-2xl shadow-slate-950/25 backdrop-blur-sm sm:h-36 sm:w-72">
+              <BrandLogo
+                className="h-28 w-56 drop-shadow-[0_16px_34px_rgba(2,6,23,0.65)] sm:h-32 sm:w-64"
+                tone="white"
+              />
+            </span>
             <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/14 px-4 py-2 text-sm font-black text-amber-50 shadow-lg shadow-slate-950/20">
               <Sparkles className="size-4 text-amber-200" />
               {qrWelcomeLocation ? `مرحبًا بك في صيف وصحة – ${qrWelcomeLocation.name}` : 'منطقة عسير ترحب بك'}

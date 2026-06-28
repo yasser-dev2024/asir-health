@@ -182,7 +182,9 @@ export function AdminLayout() {
       {/* ── Mobile top bar ──────────────────────────────────────────────────── */}
       <div className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur-sm lg:hidden">
         <div className="flex items-center gap-3 px-4 py-3">
-          <BrandLogo className="h-10 w-20 shrink-0" />
+          <span className="grid h-12 w-28 shrink-0 place-items-center rounded-xl border border-teal-100 bg-white px-2 shadow-sm shadow-teal-950/8">
+            <BrandLogo className="h-10 w-24" />
+          </span>
           <span className="text-sm font-black text-slate-900">لوحة التحكم</span>
           <button
             className="mr-auto flex items-center gap-1.5 rounded-xl bg-slate-100 px-3 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-200"
@@ -227,7 +229,9 @@ export function AdminLayout() {
 
             {/* Brand */}
             <div className="flex items-center gap-3 rounded-xl p-2">
-              <BrandLogo className="h-14 w-24 shrink-0" />
+              <span className="grid h-16 w-36 shrink-0 place-items-center rounded-xl border border-teal-100 bg-white px-2 shadow-sm shadow-teal-950/8">
+                <BrandLogo className="h-14 w-32" />
+              </span>
               <div>
                 <p className="text-base font-black text-slate-950">لوحة التحكم</p>
                 <p className="text-xs font-bold text-emerald-700">بوابة الإدارة</p>

@@ -1,6 +1,6 @@
-import asirLogoWhite from '../../assets/branding/logos/شعار عسير ابيض.png';
-import clusterLogoWhite from '../../assets/branding/logos/شعار التجمع ابيض.png';
-import clusterLogoColor from '../../assets/branding/logos/شعار التجمع ملون.png';
+import asirLogoWhite from '../../assets/branding/logos/cropped/asir-white.png';
+import clusterLogoColor from '../../assets/branding/logos/cropped/cluster-color.png';
+import clusterLogoWhite from '../../assets/branding/logos/cropped/cluster-white.png';
 
 type BrandLogoTone = 'color' | 'white' | 'asir-white';
 

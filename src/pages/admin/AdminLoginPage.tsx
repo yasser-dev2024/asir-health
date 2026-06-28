@@ -70,7 +70,9 @@ export function AdminLoginPage() {
       />
       <section className="relative w-full max-w-md rounded-lg border border-white/10 bg-white p-5 text-slate-950 shadow-2xl shadow-slate-950/40">
         <div className="grid justify-items-center gap-2 text-center">
-          <BrandLogo className="h-20 w-36" />
+          <span className="grid h-28 w-56 place-items-center rounded-2xl border border-teal-100 bg-teal-50/40 px-4 shadow-inner shadow-white">
+            <BrandLogo className="h-24 w-48" />
+          </span>
           <div>
             <h1 className="text-xl font-black">بوابة الإدارة</h1>
             <p className="text-sm font-bold text-slate-500">صيف وصحة - مساعد</p>

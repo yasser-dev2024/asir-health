@@ -146,16 +146,18 @@ export function SmartHealthEntry({ visible, force = false, onDone }: SmartHealth
       <span className="home-asir-strip absolute inset-x-0 top-0 h-3" />
       <span className="home-gold-thread absolute top-[24%] left-[-20%] h-0.5 w-[92%] rotate-[-14deg]" />
 
-      <div className="smart-entry-card relative mx-auto flex min-h-full w-full max-w-md flex-col overflow-x-hidden overflow-y-auto px-5 pb-[calc(env(safe-area-inset-bottom)+1.35rem)] pt-[calc(env(safe-area-inset-top)+1.35rem)]">
-        <header className="flex items-center justify-between gap-3 pr-16 sm:pr-0">
+      <div className="smart-entry-card relative mx-auto flex min-h-full w-full max-w-md flex-col overflow-x-hidden overflow-y-auto px-5 pb-[calc(env(safe-area-inset-bottom)+1.35rem)] pt-[calc(env(safe-area-inset-top)+1.15rem)]">
+        <header className="grid justify-items-center gap-2 text-center">
+          <span className="smart-entry-brand-badge grid h-24 w-56 place-items-center rounded-2xl border border-white/18 bg-slate-950/20 px-4 shadow-2xl shadow-slate-950/20 backdrop-blur-sm">
+            <BrandLogo className="h-20 w-48" tone="white" />
+          </span>
           <div className="min-w-0">
             <p className="text-xs font-black uppercase tracking-normal text-amber-100">Smart Health Entry</p>
             <h1 className="mt-1 text-xl font-black sm:text-2xl">الدخول الصحي الذكي</h1>
           </div>
-          <BrandLogo className="h-14 w-24 shrink-0" tone="white" />
         </header>
 
-        <main className="grid flex-1 place-items-center py-7">
+        <main className="grid flex-1 place-items-center py-5">
           {step === 'age' ? (
             <section className="w-full">
               <div className="mb-7 text-center">
