@@ -70,6 +70,8 @@ interface AppState {
   savedPlan: boolean;
   adminAuthenticated: boolean;
   splashSeen: boolean;
+  featuresEnabled: { healthHero: boolean; map: boolean };
+  toggleFeature: (feature: 'healthHero' | 'map') => void;
   setSplashSeen: () => void;
   setJourneyAnswers: (answers: JourneyAnswers) => void;
   savePlan: () => void;
@@ -504,6 +506,14 @@ export const useAppStore = create<AppState>()(
       savedPlan: false,
       adminAuthenticated: hasValidAdminSession(),
       splashSeen: false,
+      featuresEnabled: { healthHero: true, map: true },
+      toggleFeature: (feature) =>
+        set((state) => ({
+          featuresEnabled: {
+            ...state.featuresEnabled,
+            [feature]: !state.featuresEnabled[feature],
+          },
+        })),
       setSplashSeen: () => set({ splashSeen: true }),
       setJourneyAnswers: (answers) => {
         logEvent('info', 'journey_created', { answers });
@@ -1132,6 +1142,7 @@ export const useAppStore = create<AppState>()(
         journeyAnswers: state.journeyAnswers,
         savedPlan: state.savedPlan,
         splashSeen: state.splashSeen,
+        featuresEnabled: state.featuresEnabled,
       }),
     }
   )

@@ -4,9 +4,11 @@ import {
   BookOpen,
   Bot,
   CalendarDays,
+  Flame,
   HeartPulse,
   LogOut,
   QrCode,
+  Settings,
   Ticket,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -27,6 +29,7 @@ const ANCHOR_SECTIONS = [
   { label: 'الجواز',         id: 'passport',         icon: Ticket       },
   { label: 'البداية الذكية', id: 'smart-entry',      icon: Activity     },
   { label: 'تقارير QR',      id: 'qr',               icon: QrCode       },
+  { label: 'التحكم بالميزات', id: 'features',        icon: Settings     },
 ] as const;
 
 const ROUTE_SECTIONS = [
@@ -129,14 +132,14 @@ export function AdminLayout() {
       <button
         className={`group relative flex min-h-11 w-full items-center gap-3 rounded-xl px-3.5 text-sm font-bold transition-all duration-200 ${
           active
-            ? 'bg-gradient-to-l from-emerald-600 to-teal-700 text-white shadow-lg shadow-emerald-600/25'
+            ? 'bg-gradient-to-l from-[#15508A] to-[#283A83] text-white shadow-lg shadow-[#15508A]/25'
             : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
         }`}
         onClick={() => goToSection(id)}
         type="button"
       >
         {active && (
-          <span className="absolute right-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-full bg-emerald-200" />
+          <span className="absolute right-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-full bg-[#E0F9FA]" />
         )}
         <Icon
           className={`size-4 shrink-0 transition-transform duration-200 ${
@@ -162,7 +165,7 @@ export function AdminLayout() {
       <button
         className={`flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-xs font-black transition-all ${
           active
-            ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
+            ? 'bg-[#15508A] text-white shadow-md shadow-[#15508A]/20'
             : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
         }`}
         onClick={() => goToSection(id)}
@@ -182,7 +185,7 @@ export function AdminLayout() {
       {/* ── Mobile top bar ──────────────────────────────────────────────────── */}
       <div className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur-sm lg:hidden">
         <div className="flex items-center gap-3 px-4 py-3">
-          <span className="grid h-12 w-28 shrink-0 place-items-center rounded-xl border border-teal-100 bg-white px-2 shadow-sm shadow-teal-950/8">
+          <span className="grid h-12 w-28 shrink-0 place-items-center rounded-xl border border-[#E0F9FA] bg-white px-2 shadow-sm shadow-[#15508A]/8">
             <BrandLogo className="h-10 w-24" />
           </span>
           <span className="text-sm font-black text-slate-900">لوحة التحكم</span>
@@ -206,7 +209,7 @@ export function AdminLayout() {
               className={({ isActive }) =>
                 `flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-xs font-black transition-all ${
                   isActive
-                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
+                    ? 'bg-[#15508A] text-white shadow-md shadow-[#15508A]/20'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`
               }
@@ -229,12 +232,12 @@ export function AdminLayout() {
 
             {/* Brand */}
             <div className="flex items-center gap-3 rounded-xl p-2">
-              <span className="grid h-16 w-36 shrink-0 place-items-center rounded-xl border border-teal-100 bg-white px-2 shadow-sm shadow-teal-950/8">
+              <span className="grid h-16 w-36 shrink-0 place-items-center rounded-xl border border-[#E0F9FA] bg-white px-2 shadow-sm shadow-[#15508A]/8">
                 <BrandLogo className="h-14 w-32" />
               </span>
               <div>
                 <p className="text-base font-black text-slate-950">لوحة التحكم</p>
-                <p className="text-xs font-bold text-emerald-700">بوابة الإدارة</p>
+                <p className="text-xs font-bold text-[#15508A]">بوابة الإدارة</p>
               </div>
             </div>
 
@@ -253,7 +256,7 @@ export function AdminLayout() {
                   className={({ isActive }) =>
                     `flex min-h-11 items-center gap-3 rounded-xl px-3.5 text-sm font-bold transition-all duration-200 ${
                       isActive
-                        ? 'bg-gradient-to-l from-emerald-600 to-teal-700 text-white shadow-lg shadow-emerald-600/25'
+                        ? 'bg-gradient-to-l from-[#15508A] to-[#283A83] text-white shadow-lg shadow-[#15508A]/25'
                         : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
                     }`
                   }

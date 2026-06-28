@@ -27,24 +27,32 @@ export function DownloadsPage() {
           const fileUrl = safeUrl(content.fileUrl) || '#';
 
           return (
-            <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" key={content.id}>
-              <div className="flex items-center justify-between gap-3">
-                <span className="grid size-12 place-items-center rounded-lg bg-teal-50 text-teal-700">
-                  <Icon className="size-5" />
-                </span>
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">
-                  {content.category}
-                </span>
+            <article className="group rounded-xl border border-[#E0F9FA] bg-white shadow-sm hover:shadow-md hover:border-[#15508A]/30 transition-all duration-200" key={content.id}>
+              <div className="rounded-t-xl px-4 pt-4 pb-3 border-b border-[#E0F9FA]" style={{ background: 'linear-gradient(135deg,#F4FAFC,#E0F9FA55)' }}>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="grid size-12 place-items-center rounded-xl bg-[#15508A] text-white shadow-md shadow-[#15508A]/25">
+                    <Icon className="size-5" />
+                  </span>
+                  <span className="rounded-full border border-[#E0F9FA] bg-white px-3 py-1 text-xs font-bold text-[#057590]">
+                    {content.category}
+                  </span>
+                </div>
+                <h2 className="mt-3 text-lg font-black text-[#283A83]">{content.title}</h2>
               </div>
-              <h2 className="mt-4 text-lg font-black text-slate-950">{content.title}</h2>
-              <p className="mt-2 min-h-20 text-sm leading-7 text-slate-600">{content.summary}</p>
-              <div className="mt-4 flex items-center justify-between gap-3">
-                <p className="text-xs font-bold text-slate-500">تحديث {content.updatedAt}</p>
-                <a href={fileUrl} rel="noopener noreferrer" target="_blank">
-                  <Button icon={<Download className="size-4" />} variant="secondary">
-                    {content.actionLabel}
-                  </Button>
-                </a>
+              <div className="p-4">
+                <p className="min-h-16 text-sm leading-7 text-slate-600">{content.summary}</p>
+                <div className="mt-4 flex items-center justify-between gap-3">
+                  <p className="text-xs font-bold text-[#A09EA9]">تحديث {content.updatedAt}</p>
+                  <a href={fileUrl} rel="noopener noreferrer" target="_blank">
+                    <button
+                      className="flex items-center gap-2 rounded-lg bg-[#15508A] px-4 py-2 text-sm font-black text-white shadow-sm hover:bg-[#283A83] transition"
+                      type="button"
+                    >
+                      <Download className="size-4" />
+                      {content.actionLabel}
+                    </button>
+                  </a>
+                </div>
               </div>
             </article>
           );

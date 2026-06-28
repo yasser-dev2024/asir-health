@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   Baby,
   Bot,
+  Flame,
   HeartPulse,
   MapPinned,
   QrCode,
@@ -14,7 +15,6 @@ import {
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import asirHomeFeature from '../assets/asir-home-feature.png';
 import { BrandLogo } from '../components/BrandLogo';
 import { Button } from '../components/ui/Button';
 import { useAppStore } from '../store/appStore';
@@ -81,8 +81,8 @@ function OptionButtons<T extends string | boolean>({
         <button
           className={`min-h-12 rounded-lg border px-3 text-sm font-black transition ${
             value === option.value
-              ? 'border-emerald-700 bg-emerald-700 text-white shadow-lg shadow-emerald-950/18'
-              : 'border-slate-200 bg-white text-slate-700 hover:border-amber-300 hover:bg-amber-50'
+              ? 'border-[#15508A] bg-[#15508A] text-white shadow-lg shadow-[#15508A]/20'
+              : 'border-slate-200 bg-white text-slate-700 hover:border-[#E0F9FA] hover:bg-[#F4FAFC]'
           }`}
           key={String(option.value)}
           onClick={() => onChange(option.value)}
@@ -203,17 +203,14 @@ export function HomePage() {
   }
 
   return (
-    <div className="bg-slate-50">
-      <section className="relative isolate overflow-hidden bg-[#283A83] text-white">
-        <img
-          alt="منظر من عسير"
-          className="absolute inset-0 h-full w-full object-cover object-center"
-          src={asirHomeFeature}
-        />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(21,80,138,0.48),rgba(5,117,144,0.62)_42%,rgba(40,58,131,0.92))]" />
+    <div className="bg-[#F4FAFC]">
+      {/* Hero — pure gradient, no landscape image */}
+      <section className="relative isolate overflow-hidden text-white" style={{ background: 'linear-gradient(158deg,#1c2d6e 0%,#283A83 50%,#15508A 100%)' }}>
         <div className="home-asir-strip absolute inset-x-0 top-0 h-3" />
         <span className="home-gold-thread absolute top-[22%] left-[-18%] h-0.5 w-[82%] rotate-[-14deg]" />
         <span className="home-gold-thread home-gold-thread-delay absolute bottom-[28%] right-[-22%] h-0.5 w-[92%] rotate-[18deg]" />
+        {/* Subtle radial highlight */}
+        <div className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse 70% 55% at 30% 40%, rgba(21,80,138,0.35) 0%, transparent 70%)' }} />
 
         <div className="relative mx-auto grid min-h-[calc(100dvh-4rem)] w-full max-w-6xl content-end gap-5 px-4 pb-28 pt-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-end lg:pb-14">
           <div className="pb-2">
@@ -248,10 +245,10 @@ export function HomePage() {
             <div className="p-4 sm:p-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm font-black text-emerald-700">رحلتك الآن</p>
+                  <p className="text-sm font-black text-[#15508A]">رحلتك الآن</p>
                   <h2 className="mt-1 text-2xl font-black leading-tight">ابدأ من المكان المناسب لك</h2>
                 </div>
-                <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-amber-100 text-amber-700">
+                <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-[#E0F9FA] text-[#057590]">
                   <QrCode className="size-6" />
                 </span>
               </div>
@@ -296,11 +293,11 @@ export function HomePage() {
               </div>
 
               <div className="mt-5 border-t border-slate-100 pt-4">
-                <p className="text-sm font-black text-emerald-800">اقتراحات فورية</p>
+                <p className="text-sm font-black text-[#15508A]">اقتراحات فورية</p>
                 <div className="mt-3 grid gap-3">
                   {recommendations.slice(0, 3).map((item) => (
                     <article className="flex items-start gap-3" key={item.title}>
-                      <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-emerald-700 text-white">
+                      <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-[#15508A] text-white">
                         <item.icon className="size-5" />
                       </span>
                       <div>
@@ -312,7 +309,7 @@ export function HomePage() {
                 </div>
               </div>
 
-              <Button className="mt-5 w-full bg-emerald-700 hover:bg-emerald-800" icon={<ArrowLeft className="size-4" />} onClick={startPersonalPlan}>
+              <Button className="mt-5 w-full bg-[#15508A] hover:bg-[#283A83]" icon={<ArrowLeft className="size-4" />} onClick={startPersonalPlan}>
                 اعرض الخيارات المناسبة
               </Button>
             </div>
@@ -324,22 +321,27 @@ export function HomePage() {
         <div className="mx-auto max-w-6xl">
           <div className="mb-4 flex items-end justify-between gap-4">
             <div>
-              <p className="text-sm font-black text-emerald-700">أجواء عسير في رحلتك</p>
+              <p className="text-sm font-black text-[#15508A]">أجواء عسير في رحلتك</p>
               <h2 className="mt-1 text-2xl font-black text-slate-950">سياحة وفرح واطمئنان</h2>
             </div>
-            <p className="hidden text-sm font-bold text-slate-500 sm:block">
+            <p className="hidden text-sm font-bold text-[#A09EA9] sm:block">
               {metrics.journeys.toLocaleString('ar-SA')} رحلة مخططة
             </p>
           </div>
 
-          <div className="mb-4 grid overflow-hidden rounded-lg border border-emerald-100 bg-white shadow-sm md:grid-cols-[1.05fr_0.95fr]">
-            <div className="relative min-h-64 overflow-hidden">
-              <img
-                alt="منظر مبهج من عسير"
-                className="absolute inset-0 h-full w-full object-cover"
-                src={asirHomeFeature}
-              />
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(21,80,138,0.22))]" />
+          {/* Feature card — gradient instead of image */}
+          <div className="mb-4 grid overflow-hidden rounded-xl border border-[#E0F9FA] bg-white shadow-sm md:grid-cols-[1.05fr_0.95fr]">
+            <div className="relative min-h-64 overflow-hidden" style={{ background: 'linear-gradient(135deg,#283A83 0%,#15508A 50%,#057590 100%)' }}>
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-white">
+                <div className="grid grid-cols-3 gap-3 w-full max-w-xs">
+                  {[Route, HeartPulse, Sparkles].map((Icon, i) => (
+                    <div className="rounded-xl border border-white/20 bg-white/12 p-4 text-center backdrop-blur-sm" key={i}>
+                      <Icon className="mx-auto size-8 text-amber-200" />
+                    </div>
+                  ))}
+                </div>
+                <p className="text-center text-sm font-black text-white/90">مسار صحي · طبيعة عسير · فعاليات</p>
+              </div>
               <span className="home-gold-thread absolute top-10 left-[-20%] h-0.5 w-[96%] rotate-[-12deg]" />
               <span className="home-gold-thread home-gold-thread-delay absolute bottom-16 right-[-22%] h-0.5 w-[92%] rotate-[16deg]" />
             </div>
@@ -355,7 +357,7 @@ export function HomePage() {
               </p>
               <div className="grid grid-cols-3 gap-2">
                 {['سياحة', 'صحة', 'فرح'].map((label) => (
-                  <div className="rounded-lg bg-slate-50 px-3 py-3 text-center text-sm font-black text-emerald-800" key={label}>
+                  <div className="rounded-lg bg-[#F4FAFC] px-3 py-3 text-center text-sm font-black text-[#15508A]" key={label}>
                     {label}
                   </div>
                 ))}
@@ -365,8 +367,8 @@ export function HomePage() {
 
           <div className="grid gap-3 md:grid-cols-3">
             {asirMoments.map((item) => (
-              <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" key={item.title}>
-                <span className="grid size-11 place-items-center rounded-lg bg-amber-100 text-amber-700">
+              <article className="rounded-lg border border-[#E0F9FA] bg-white p-4 shadow-sm" key={item.title}>
+                <span className="grid size-11 place-items-center rounded-lg bg-[#E0F9FA] text-[#057590]">
                   <item.icon className="size-6" />
                 </span>
                 <h3 className="mt-4 text-lg font-black text-slate-950">{item.title}</h3>
@@ -375,20 +377,21 @@ export function HomePage() {
             ))}
           </div>
 
-          <div className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr]">
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
             <button
-              className="rounded-lg border border-emerald-200 bg-emerald-700 p-5 text-right text-white shadow-sm transition hover:bg-emerald-800"
+              className="rounded-xl border border-[#15508A]/20 p-5 text-right text-white shadow-sm transition hover:opacity-90"
               onClick={() => navigate('/assistant')}
+              style={{ background: 'linear-gradient(135deg,#15508A,#057590)' }}
               type="button"
             >
               <Bot className="size-6" />
               <h2 className="mt-4 text-xl font-black">اسأل الدكتور مساعد</h2>
-              <p className="mt-2 text-sm font-bold leading-7 text-emerald-50">
+              <p className="mt-2 text-sm font-bold leading-7 text-white/85">
                 إجابة سريعة عن المركز الصحي، الطوارئ، الفعاليات، أو أقرب نقطة توعوية.
               </p>
             </button>
             <button
-              className="rounded-lg border border-amber-200 bg-white p-5 text-right shadow-sm transition hover:bg-amber-50"
+              className="rounded-xl border border-amber-200 bg-white p-5 text-right shadow-sm transition hover:bg-amber-50"
               onClick={() => navigate('/events')}
               type="button"
             >
@@ -396,6 +399,18 @@ export function HomePage() {
               <h2 className="mt-4 text-xl font-black text-slate-950">فعاليات قريبة</h2>
               <p className="mt-2 text-sm font-bold leading-7 text-slate-600">
                 اختر فعالية صحية أو عائلية قريبة، ثم اربطها بخطة اليوم.
+              </p>
+            </button>
+            <button
+              className="rounded-xl border border-amber-300 p-5 text-right text-white shadow-sm transition hover:opacity-90"
+              onClick={() => navigate('/hero')}
+              style={{ background: 'linear-gradient(135deg,#283A83,#D4AF37)' }}
+              type="button"
+            >
+              <Flame className="size-6 text-amber-200" />
+              <h2 className="mt-4 text-xl font-black">بطل الصحة في عسير</h2>
+              <p className="mt-2 text-sm font-bold leading-7 text-white/85">
+                اختبر معرفتك الصحية وتحدّ نفسك وعائلتك وشارك نتيجتك.
               </p>
             </button>
           </div>

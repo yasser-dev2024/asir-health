@@ -5,8 +5,11 @@ import { healthCenters, walkways } from '../data/mockData';
 import { useAppStore } from '../store/appStore';
 import { safeUrl } from '../utils/security';
 
+
+
 export function NearbyPage() {
   const event = useAppStore((state) => state.events.find((item) => item.active));
+  const mapEnabled = useAppStore((state) => state.featuresEnabled.map);
   const center = healthCenters[0] ?? {
     id: 'center-default',
     name: 'مركز صحي قريب',
@@ -34,13 +37,13 @@ export function NearbyPage() {
       />
       <div className="grid gap-4 lg:grid-cols-[1fr_0.9fr]">
         <section className="grid gap-3">
-          <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+          <article className="rounded-xl border border-[#E0F9FA] bg-white p-4 shadow-sm">
             <div className="flex items-start gap-3">
-              <span className="grid size-11 place-items-center rounded-lg bg-emerald-50 text-emerald-700">
+              <span className="grid size-11 place-items-center rounded-lg bg-green-50 text-[#16910D]">
                 <Ambulance className="size-5" />
               </span>
               <div className="flex-1">
-                <p className="text-xs font-bold text-slate-500">أقرب مركز صحي</p>
+                <p className="text-xs font-bold text-[#A09EA9]">أقرب مركز صحي</p>
                 <h2 className="mt-1 text-lg font-black text-slate-950">{center.name}</h2>
                 <p className="mt-2 text-sm leading-7 text-slate-600">
                   يبعد {center.distance}، {center.availability}.
@@ -60,25 +63,25 @@ export function NearbyPage() {
               </div>
             </div>
           </article>
-          <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+          <article className="rounded-xl border border-[#E0F9FA] bg-white p-4 shadow-sm">
             <div className="flex items-start gap-3">
-              <span className="grid size-11 place-items-center rounded-lg bg-sky-50 text-sky-700">
+              <span className="grid size-11 place-items-center rounded-lg bg-[#E0F9FA] text-[#057590]">
                 <MapPin className="size-5" />
               </span>
               <div>
-                <p className="text-xs font-bold text-slate-500">أقرب فعالية</p>
+                <p className="text-xs font-bold text-[#A09EA9]">أقرب فعالية</p>
                 <h2 className="mt-1 text-lg font-black text-slate-950">{event?.title ?? 'مسار الضباب الصحي'}</h2>
                 <p className="mt-2 text-sm leading-7 text-slate-600">{event?.location ?? 'ممشى الضباب - أبها'}</p>
               </div>
             </div>
           </article>
-          <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+          <article className="rounded-xl border border-[#E0F9FA] bg-white p-4 shadow-sm">
             <div className="flex items-start gap-3">
-              <span className="grid size-11 place-items-center rounded-lg bg-teal-50 text-teal-700">
+              <span className="grid size-11 place-items-center rounded-lg bg-[#E0F9FA] text-[#15508A]">
                 <Trees className="size-5" />
               </span>
               <div>
-                <p className="text-xs font-bold text-slate-500">أقرب ممشى</p>
+                <p className="text-xs font-bold text-[#A09EA9]">أقرب ممشى</p>
                 <h2 className="mt-1 text-lg font-black text-slate-950">{walkway.name}</h2>
                 <p className="mt-2 text-sm leading-7 text-slate-600">
                   {walkway.distance} - {walkway.length} - {walkway.shade}
@@ -88,7 +91,7 @@ export function NearbyPage() {
           </article>
         </section>
         <aside className="grid gap-4">
-          <section className="rounded-lg border border-rose-200 bg-rose-50 p-4">
+          <section className="rounded-xl border border-rose-200 bg-rose-50 p-4">
             <h2 className="text-lg font-black text-rose-900">الطوارئ</h2>
             <p className="mt-2 text-sm leading-7 text-rose-800">
               عند ألم صدر، ضيق تنفس شديد، إغماء، نزيف، أو أعراض خطيرة اتصل فوراً ولا تعتمد على المنصة.
@@ -106,7 +109,7 @@ export function NearbyPage() {
               </a>
             </div>
           </section>
-          <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+          <section className="rounded-xl border border-[#E0F9FA] bg-white p-4 shadow-sm">
             <h2 className="text-lg font-black text-slate-950">مشاركة الموقع</h2>
             <p className="mt-2 text-sm leading-7 text-slate-600">
               يفتح زر المشاركة خيارات الجهاز لإرسال رابط موقعك الحالي للفريق أو للمرافقين.
@@ -125,23 +128,30 @@ export function NearbyPage() {
               مشاركة الموقع
             </Button>
           </section>
-          <section className="relative h-64 overflow-hidden rounded-lg border border-slate-200 bg-[linear-gradient(135deg,#F4FAFC,#DFF2FB)] shadow-sm">
-            <div className="absolute inset-5 rounded-[2rem] border-2 border-white/70" />
-            <div className="absolute right-10 top-8 flex items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm">
-              <Navigation className="size-4 text-teal-700" />
-              موقعك الحالي
-            </div>
-            {[center.name, event?.title ?? 'فعالية قريبة', walkway.name].map((label, index) => (
-              <div
-                className="absolute flex items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm"
-                key={label}
-                style={{ left: `${18 + index * 17}%`, top: `${42 + index * 14}%` }}
-              >
-                <MapPin className="size-4 text-teal-700" />
-                {label}
+          {mapEnabled && <section className="overflow-hidden rounded-xl border border-[#E0F9FA] shadow-sm">
+            <div className="flex items-center justify-between bg-[#F4FAFC] px-4 py-3 border-b border-[#E0F9FA]">
+              <div className="flex items-center gap-2">
+                <Navigation className="size-4 text-[#15508A]" />
+                <span className="text-sm font-black text-[#283A83]">خريطة عسير</span>
               </div>
-            ))}
-          </section>
+              <a
+                className="text-xs font-bold text-[#15508A] hover:underline"
+                href="https://maps.google.com/?q=أبها+عسير+السعودية"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                فتح في خرائط Google
+              </a>
+            </div>
+            <iframe
+              allowFullScreen
+              className="h-64 w-full border-0"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              src="https://maps.google.com/maps?q=Abha+Aseer+Saudi+Arabia&z=12&output=embed&hl=ar"
+              title="خريطة منطقة عسير"
+            />
+          </section>}
         </aside>
       </div>
     </div>

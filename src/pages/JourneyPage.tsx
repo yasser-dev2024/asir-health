@@ -56,8 +56,8 @@ function OptionGrid<T extends string | boolean>({
         <button
           className={`min-h-12 rounded-lg border px-3 text-sm font-black transition ${
             value === option.value
-              ? 'border-teal-700 bg-teal-700 text-white shadow-lg shadow-teal-900/15'
-              : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-teal-50'
+              ? 'border-[#15508A] bg-[#15508A] text-white shadow-lg shadow-[#15508A]/20'
+              : 'border-[#E0F9FA] bg-[#F4FAFC] text-slate-700 hover:border-[#15508A]/30 hover:bg-white'
           }`}
           key={String(option.value)}
           onClick={() => onChange(option.value)}
@@ -114,9 +114,9 @@ export function JourneyPage() {
       />
 
       <div className="grid gap-4">
-        <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <section className="rounded-xl border border-[#E0F9FA] bg-white p-4 shadow-sm">
           <div className="flex items-center gap-3">
-            <span className="grid size-10 place-items-center rounded-lg bg-teal-50 text-teal-700">
+            <span className="grid size-10 place-items-center rounded-lg bg-[#E0F9FA] text-[#15508A]">
               <MapPin className="size-5" />
             </span>
             <h2 className="text-base font-black text-slate-950">أنت الآن في ..</h2>
@@ -128,9 +128,9 @@ export function JourneyPage() {
           />
         </section>
 
-        <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <section className="rounded-xl border border-[#E0F9FA] bg-white p-4 shadow-sm">
           <div className="flex items-center gap-3">
-            <span className="grid size-10 place-items-center rounded-lg bg-sky-50 text-sky-700">
+            <span className="grid size-10 place-items-center rounded-lg bg-[#E0F9FA] text-[#057590]">
               <HeartPulse className="size-5" />
             </span>
             <h2 className="text-base font-black text-slate-950">العمر</h2>
@@ -142,9 +142,9 @@ export function JourneyPage() {
           />
         </section>
 
-        <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <section className="rounded-xl border border-[#E0F9FA] bg-white p-4 shadow-sm">
           <div className="flex items-center gap-3">
-            <span className="grid size-10 place-items-center rounded-lg bg-emerald-50 text-emerald-700">
+            <span className="grid size-10 place-items-center rounded-lg bg-[#E0F9FA] text-[#16910D]">
               <Users className="size-5" />
             </span>
             <h2 className="text-base font-black text-slate-950">العائلة</h2>
@@ -159,7 +159,7 @@ export function JourneyPage() {
           />
         </section>
 
-        <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <section className="rounded-xl border border-[#E0F9FA] bg-white p-4 shadow-sm">
           <div className="flex items-center gap-3">
             <span className="grid size-10 place-items-center rounded-lg bg-amber-50 text-amber-700">
               <Target className="size-5" />
@@ -174,7 +174,7 @@ export function JourneyPage() {
         </section>
       </div>
 
-      <div className="sticky bottom-24 mt-5 rounded-lg border border-slate-200 bg-white p-3 shadow-lg shadow-slate-950/10 sm:static sm:shadow-none">
+      <div className="sticky bottom-24 mt-5 rounded-xl border border-[#E0F9FA] bg-white p-3 shadow-lg shadow-[#15508A]/10 sm:static sm:shadow-none">
         <Button className="w-full" icon={<ArrowLeft className="size-4" />} onClick={submitJourney}>
           اعرض الخيارات المناسبة
         </Button>

@@ -70,7 +70,7 @@ export function AdminLoginPage() {
       />
       <section className="relative w-full max-w-md rounded-lg border border-white/10 bg-white p-5 text-slate-950 shadow-2xl shadow-slate-950/40">
         <div className="grid justify-items-center gap-2 text-center">
-          <span className="grid h-28 w-56 place-items-center rounded-2xl border border-teal-100 bg-teal-50/40 px-4 shadow-inner shadow-white">
+          <span className="grid h-28 w-56 place-items-center rounded-2xl border border-[#E0F9FA] bg-[#F4FAFC] px-4 shadow-inner shadow-white">
             <BrandLogo className="h-24 w-48" />
           </span>
           <div>
@@ -83,7 +83,7 @@ export function AdminLoginPage() {
             البريد الإلكتروني
             <input
               autoComplete="username"
-              className="min-h-12 rounded-lg border border-slate-200 px-4 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+              className="min-h-12 rounded-lg border border-slate-200 px-4 outline-none focus:border-[#15508A] focus:ring-2 focus:ring-[#E0F9FA]"
               onChange={(event) => setEmail(event.target.value)}
               required
               type="email"
@@ -95,7 +95,7 @@ export function AdminLoginPage() {
             <div className="relative">
               <input
                 autoComplete="current-password"
-                className="w-full min-h-12 rounded-lg border border-slate-200 px-4 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                className="w-full min-h-12 rounded-lg border border-slate-200 px-4 outline-none focus:border-[#15508A] focus:ring-2 focus:ring-[#E0F9FA]"
                 onChange={(event) => setPassword(event.target.value)}
                 required
                 type={showPassword ? 'text' : 'password'}

@@ -8,10 +8,13 @@ import {
   Eye,
   EyeOff,
   FileText,
+  Flame,
+  Map,
   Plus,
   QrCode,
   Save,
   Search,
+  Settings,
   Ticket,
   TrendingUp,
   Trash2,
@@ -98,7 +101,7 @@ function useSavedToast() {
 function SaveToast({ message }: { message: string }) {
   if (!message) return null;
   return (
-    <div className="fixed bottom-6 right-6 z-[300] flex items-center gap-2.5 rounded-2xl bg-teal-700 px-5 py-3.5 text-sm font-black text-white shadow-2xl shadow-teal-900/30 animate-in slide-in-from-bottom-4">
+    <div className="fixed bottom-6 right-6 z-[300] flex items-center gap-2.5 rounded-2xl bg-[#15508A] px-5 py-3.5 text-sm font-black text-white shadow-2xl shadow-[#15508A]/30 animate-in slide-in-from-bottom-4">
       <CheckCircle2 className="size-5 shrink-0" />
       {message}
     </div>
@@ -116,7 +119,7 @@ function FLabel({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-const inputCls = 'w-full min-h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100 transition placeholder:text-slate-300';
+const inputCls = 'w-full min-h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-[#15508A] focus:ring-2 focus:ring-[#E0F9FA] transition placeholder:text-slate-300';
 const areaCls = `${inputCls} py-2.5 leading-7`;
 
 function FInput({ label, value, onChange, type = 'text', placeholder = '' }: { label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string }) {
@@ -149,7 +152,7 @@ function Section({ id, icon: Icon, title, desc, color = 'teal', children }: {
   id: string; icon: typeof Bot; title: string; desc?: string; color?: 'teal' | 'indigo' | 'amber' | 'rose' | 'slate'; children: ReactNode;
 }) {
   const palette = {
-    teal: 'bg-teal-600', indigo: 'bg-indigo-600', amber: 'bg-amber-500', rose: 'bg-rose-500', slate: 'bg-slate-700',
+    teal: 'bg-[#15508A]', indigo: 'bg-indigo-600', amber: 'bg-amber-500', rose: 'bg-rose-500', slate: 'bg-slate-700',
   };
   return (
     <section className="scroll-mt-6 rounded-3xl border border-slate-200 bg-white shadow-sm" id={id}>
@@ -206,7 +209,7 @@ function ItemCard({ active, title, sub, tags, onEdit, onToggle, onDelete, extraA
       {tags && tags.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {tags.map((t) => (
-            <span className="rounded-full bg-teal-50 px-2.5 py-0.5 text-[11px] font-black text-teal-700" key={t}>{t}</span>
+            <span className="rounded-full bg-[#E0F9FA] px-2.5 py-0.5 text-[11px] font-black text-[#15508A]" key={t}>{t}</span>
           ))}
         </div>
       )}
@@ -218,7 +221,7 @@ function ItemCard({ active, title, sub, tags, onEdit, onToggle, onDelete, extraA
           <Edit3 className="size-3.5" /> تعديل
         </button>
         <button
-          className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-black transition ${active ? 'bg-amber-50 text-amber-700 hover:bg-amber-100' : 'bg-teal-50 text-teal-700 hover:bg-teal-100'}`}
+          className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-black transition ${active ? 'bg-amber-50 text-amber-700 hover:bg-amber-100' : 'bg-[#E0F9FA] text-[#15508A] hover:bg-[#d0f4f7]'}`}
           onClick={onToggle} type="button"
         >
           {active ? <><EyeOff className="size-3.5" /> تعطيل</> : <><Eye className="size-3.5" /> تفعيل</>}
@@ -240,7 +243,7 @@ function ItemCard({ active, title, sub, tags, onEdit, onToggle, onDelete, extraA
 function SaveBtn({ editing }: { editing: boolean }) {
   return (
     <button
-      className="mt-1 flex w-full items-center justify-center gap-2 rounded-2xl bg-teal-600 py-3.5 text-sm font-black text-white shadow-lg shadow-teal-600/25 hover:bg-teal-700 active:scale-[0.98] transition focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+      className="mt-1 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#15508A] py-3.5 text-sm font-black text-white shadow-lg shadow-[#15508A]/25 hover:bg-[#283A83] active:scale-[0.98] transition focus:outline-none focus:ring-2 focus:ring-[#15508A] focus:ring-offset-2"
       type="submit"
     >
       {editing ? <><Save className="size-4.5" /> حفظ التعديل</> : <><Plus className="size-4.5" /> إضافة وحفظ</>}
@@ -312,6 +315,8 @@ export function AdminDashboardPage() {
   const deleteContent = useAppStore((s) => s.deleteContent);
   const toggleContent = useAppStore((s) => s.toggleContent);
   const addPassportPoints = useAppStore((s) => s.addPassportPoints);
+  const featuresEnabled = useAppStore((s) => s.featuresEnabled);
+  const toggleFeature = useAppStore((s) => s.toggleFeature);
 
   // Forms
   const [kwForm, setKwForm] = useState<KeywordFormState>(emptyKeywordForm);
@@ -401,9 +406,9 @@ export function AdminDashboardPage() {
 
       {/* ── Sync status banner ────────────────────────────── */}
       {syncStatus === 'online' && (
-        <div className="flex items-center gap-3 rounded-2xl border border-teal-200 bg-teal-50 px-5 py-3.5">
-          <Wifi className="size-5 shrink-0 text-teal-600" />
-          <p className="text-sm font-bold text-teal-800">المزامنة عبر الأجهزة مفعّلة — التعديلات تظهر على جميع الأجهزة فوراً</p>
+        <div className="flex items-center gap-3 rounded-2xl border border-[#E0F9FA] bg-[#F4FAFC] px-5 py-3.5">
+          <Wifi className="size-5 shrink-0 text-[#15508A]" />
+          <p className="text-sm font-bold text-[#283A83]">المزامنة عبر الأجهزة مفعّلة — التعديلات تظهر على جميع الأجهزة فوراً</p>
         </div>
       )}
       {syncStatus === 'local' && (
@@ -419,7 +424,7 @@ export function AdminDashboardPage() {
       {/* ── Dashboard ── */}
       <section className="scroll-mt-6" id="dashboard">
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard gradient="bg-gradient-to-br from-teal-500 to-teal-700" helper="إجمالي الزيارات" icon={Users} label="الزوار" value={metrics.visitors.toLocaleString('ar-SA')} />
+          <StatCard gradient="bg-gradient-to-br from-[#15508A] to-[#283A83]" helper="إجمالي الزيارات" icon={Users} label="الزوار" value={metrics.visitors.toLocaleString('ar-SA')} />
           <StatCard gradient="bg-gradient-to-br from-indigo-500 to-indigo-700" helper="من مواقع QR" icon={QrCode} label="مسح QR" value={metrics.qrScans.toLocaleString('ar-SA')} />
           <StatCard gradient="bg-gradient-to-br from-amber-500 to-orange-600" helper="خطط المستخدمين" icon={Activity} label="الرحلات" value={metrics.journeys.toLocaleString('ar-SA')} />
           <StatCard gradient="bg-gradient-to-br from-rose-500 to-rose-700" helper="أسئلة د. مساعد" icon={Bot} label="الاستفسارات" value={metrics.inquiries.toLocaleString('ar-SA')} />
@@ -428,11 +433,11 @@ export function AdminDashboardPage() {
         <div className="mt-4 grid gap-4 xl:grid-cols-3">
           <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
             <div className="mb-4 flex items-center gap-2">
-              <TrendingUp className="size-4 text-teal-600" />
+              <TrendingUp className="size-4 text-[#15508A]" />
               <p className="text-sm font-black text-slate-800">أكثر الفعاليات زيارة</p>
             </div>
             <div className="grid gap-3">
-              {topEvents.map((e) => <ChartRow color="bg-teal-500" key={e.id} label={e.title} max={maxEv} value={e.visits} />)}
+              {topEvents.map((e) => <ChartRow color="bg-[#15508A]" key={e.id} label={e.title} max={maxEv} value={e.visits} />)}
             </div>
           </div>
           <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
@@ -578,10 +583,10 @@ export function AdminDashboardPage() {
       {/* ── Passport ── */}
       <Section color="rose" desc="نقاط وإنجازات الجواز الصحي" icon={Ticket} id="passport" title="إدارة جواز صحة عسير">
         <div className="grid gap-4 sm:grid-cols-3">
-          <div className="rounded-2xl border border-slate-100 bg-gradient-to-br from-teal-50 to-teal-100 p-5">
-            <Ticket className="size-6 text-teal-700" />
-            <p className="mt-3 text-3xl font-black text-teal-900">{passport.points.toLocaleString('ar-SA')}</p>
-            <p className="text-sm font-bold text-teal-700">نقاط مكتسبة</p>
+          <div className="rounded-2xl border border-[#E0F9FA] bg-gradient-to-br from-[#F4FAFC] to-[#E0F9FA] p-5">
+            <Ticket className="size-6 text-[#15508A]" />
+            <p className="mt-3 text-3xl font-black text-[#283A83]">{passport.points.toLocaleString('ar-SA')}</p>
+            <p className="text-sm font-bold text-[#15508A]">نقاط مكتسبة</p>
           </div>
           <div className="rounded-2xl border border-slate-100 bg-gradient-to-br from-indigo-50 to-indigo-100 p-5">
             <QrCode className="size-6 text-indigo-700" />
@@ -594,7 +599,7 @@ export function AdminDashboardPage() {
           >
             <p className="mb-3 text-sm font-black text-slate-700">إضافة نقاط</p>
             <FInput label="عدد النقاط" onChange={setPointsDelta} type="number" value={pointsDelta} />
-            <button className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-teal-600 py-3 text-sm font-black text-white hover:bg-teal-700 transition" type="submit">
+            <button className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#15508A] py-3 text-sm font-black text-white hover:bg-[#283A83] transition" type="submit">
               <Save className="size-4" /> تطبيق
             </button>
           </form>
@@ -604,7 +609,7 @@ export function AdminDashboardPage() {
             <p className="mb-2 text-xs font-black uppercase tracking-widest text-slate-400">الإنجازات</p>
             <div className="flex flex-wrap gap-2">
               {passport.achievements.map((a) => (
-                <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-teal-700" key={a}>{a}</span>
+                <span className="rounded-full bg-[#E0F9FA] px-3 py-1 text-xs font-bold text-[#15508A]" key={a}>{a}</span>
               ))}
             </div>
           </div>
@@ -643,6 +648,66 @@ export function AdminDashboardPage() {
               ))}
             </tbody>
           </table>
+        </div>
+      </Section>
+
+      {/* ── Features Control ── */}
+      <Section color="slate" desc="تفعيل وتعطيل ميزات المنصة من لوحة التحكم" icon={Settings} id="features" title="التحكم بالميزات">
+        <div className="grid gap-4 sm:grid-cols-2">
+          {[
+            {
+              key: 'healthHero' as const,
+              label: 'بطل الصحة في عسير',
+              desc: 'صفحة الاختبار الصحي التفاعلي مع النقاط والمشاركة عبر واتساب',
+              icon: Flame,
+              color: '#D4AF37',
+            },
+            {
+              key: 'map' as const,
+              label: 'الخريطة التفاعلية',
+              desc: 'عرض خرائط Google في صفحتي الخطة والخدمات القريبة',
+              icon: Map,
+              color: '#15508A',
+            },
+          ].map(({ key, label, desc, icon: Icon, color }) => {
+            const enabled = featuresEnabled[key];
+            return (
+              <div
+                className={`rounded-2xl border-2 p-5 transition ${enabled ? 'border-[#E0F9FA] bg-white' : 'border-slate-100 bg-slate-50 opacity-70'}`}
+                key={key}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <div className="grid size-10 place-items-center rounded-xl" style={{ background: `${color}18` }}>
+                      <Icon className="size-5" style={{ color }} />
+                    </div>
+                    <div>
+                      <p className="font-black text-slate-950">{label}</p>
+                      <p className="mt-0.5 text-xs leading-5 text-slate-500">{desc}</p>
+                    </div>
+                  </div>
+                  <button
+                    className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${enabled ? 'bg-[#15508A]' : 'bg-slate-300'}`}
+                    onClick={() => { toggleFeature(key); toast.show(`تم ${enabled ? 'تعطيل' : 'تفعيل'} ${label} ✓`); }}
+                    role="switch"
+                    aria-checked={enabled}
+                    type="button"
+                  >
+                    <span
+                      className={`inline-block size-5 rounded-full bg-white shadow-sm transition-transform duration-200 mt-0.5 ${enabled ? 'translate-x-0 mr-0.5' : 'translate-x-5'}`}
+                      style={{ transform: enabled ? 'translateX(0px)' : 'translateX(-20px)' }}
+                    />
+                  </button>
+                </div>
+                <div className="mt-3">
+                  <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black ${enabled ? 'bg-green-50 text-[#16910D]' : 'bg-slate-100 text-slate-500'}`}>
+                    <span className={`size-1.5 rounded-full ${enabled ? 'bg-[#16910D]' : 'bg-slate-400'}`} />
+                    {enabled ? 'مفعّل' : 'معطّل'}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </Section>
 

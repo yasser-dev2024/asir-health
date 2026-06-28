@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { ClientLayout } from '../layouts/ClientLayout';
+import { useAppStore } from '../store/appStore';
 
 const HomePage = lazy(() => import('../pages/HomePage').then((m) => ({ default: m.HomePage })));
 const JourneyPage = lazy(() => import('../pages/JourneyPage').then((m) => ({ default: m.JourneyPage })));
@@ -11,9 +12,15 @@ const PassportPage = lazy(() => import('../pages/PassportPage').then((m) => ({ d
 const DownloadsPage = lazy(() => import('../pages/DownloadsPage').then((m) => ({ default: m.DownloadsPage })));
 const AssistantPage = lazy(() => import('../pages/AssistantPage').then((m) => ({ default: m.AssistantPage })));
 const NearbyPage = lazy(() => import('../pages/NearbyPage').then((m) => ({ default: m.NearbyPage })));
+const HealthHeroPage = lazy(() => import('../pages/HealthHeroPage').then((m) => ({ default: m.HealthHeroPage })));
 const AdminDashboardPage = lazy(() => import('../pages/admin/AdminDashboardPage').then((m) => ({ default: m.AdminDashboardPage })));
 const AdminLoginPage = lazy(() => import('../pages/admin/AdminLoginPage').then((m) => ({ default: m.AdminLoginPage })));
 const QrLocationsAdminPage = lazy(() => import('../pages/admin/QrLocationsAdminPage').then((m) => ({ default: m.QrLocationsAdminPage })));
+
+function HeroRoute() {
+  const enabled = useAppStore((s) => s.featuresEnabled.healthHero);
+  return enabled ? <HealthHeroPage /> : <Navigate replace to="/" />;
+}
 
 export function AppRoutes() {
   return (
@@ -28,6 +35,7 @@ export function AppRoutes() {
           <Route element={<DownloadsPage />} path="downloads" />
           <Route element={<AssistantPage />} path="assistant" />
           <Route element={<NearbyPage />} path="nearby" />
+          <Route element={<HeroRoute />} path="hero" />
         </Route>
         <Route element={<AdminLoginPage />} path="/admin/login" />
         <Route element={<AdminLayout />} path="/admin">

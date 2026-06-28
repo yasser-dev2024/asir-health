@@ -27,7 +27,7 @@ export function EventsPage() {
           const mapUrl = safeUrl(event.mapUrl, { allowRelative: false, allowedProtocols: ['https:'] }) || '#';
 
           return (
-          <article className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm" key={event.id}>
+          <article className="overflow-hidden rounded-xl border border-[#E0F9FA] bg-white shadow-sm hover:shadow-md transition-shadow" key={event.id}>
             <div className={`h-28 bg-gradient-to-l ${toneClasses[event.tone]} p-4 text-white`}>
               <p className="text-xs font-bold text-white/80">{event.category}</p>
               <h2 className="mt-2 text-xl font-black">{event.title}</h2>
@@ -36,20 +36,20 @@ export function EventsPage() {
               <p className="text-sm leading-7 text-slate-600">{event.description}</p>
               <div className="mt-4 grid gap-2 text-sm font-bold text-slate-700">
                 <span className="flex items-center gap-2">
-                  <MapPin className="size-4 text-teal-700" />
+                  <MapPin className="size-4 text-[#15508A]" />
                   {event.location}
                 </span>
                 <span className="flex items-center gap-2">
-                  <CalendarDays className="size-4 text-teal-700" />
+                  <CalendarDays className="size-4 text-[#15508A]" />
                   {event.date} - {event.time}
                 </span>
                 <span className="flex items-center gap-2">
-                  <Users className="size-4 text-teal-700" />
+                  <Users className="size-4 text-[#15508A]" />
                   {event.audience}
                 </span>
               </div>
               <div className="mt-4 flex items-center justify-between gap-3">
-                <p className="text-xs font-bold text-slate-500">{event.visits.toLocaleString('ar-SA')} زيارة</p>
+                <p className="text-xs font-bold text-[#A09EA9]">{event.visits.toLocaleString('ar-SA')} زيارة</p>
                 <a href={mapUrl} rel="noopener noreferrer" target="_blank">
                   <Button icon={<ExternalLink className="size-4" />} onClick={() => visitEvent(event.id)} variant="secondary">
                     الخريطة

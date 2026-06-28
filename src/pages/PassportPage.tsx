@@ -24,39 +24,39 @@ export function PassportPage() {
         eyebrow="جواز صحة عسير"
         title="إنجازاتك الصحية"
       />
-      <section className="rounded-lg bg-slate-950 p-5 text-white shadow-lg shadow-slate-950/20">
+      <section className="rounded-xl p-5 text-white shadow-lg" style={{ background: 'linear-gradient(135deg,#1c2d6e 0%,#283A83 55%,#15508A 100%)' }}>
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-bold text-cyan-100">المستوى الحالي</p>
+            <p className="text-sm font-bold text-[#E0F9FA]">المستوى الحالي</p>
             <h2 className="mt-2 text-2xl font-black">{currentLevel.title}</h2>
           </div>
-          <span className="grid size-16 place-items-center rounded-2xl bg-white/10">
-            <Trophy className="size-8 text-cyan-100" />
+          <span className="grid size-16 place-items-center rounded-2xl bg-white/12">
+            <Trophy className="size-8 text-amber-300" />
           </span>
         </div>
         <div className="mt-5">
-          <div className="flex items-center justify-between text-sm font-bold text-cyan-50">
+          <div className="flex items-center justify-between text-sm font-bold text-white/90">
             <span>{passport.points.toLocaleString('ar-SA')} نقطة</span>
             <span>{nextLevel ? `حتى ${nextLevel.title}` : 'أعلى مستوى'}</span>
           </div>
           <div className="mt-2 h-3 overflow-hidden rounded-full bg-white/15">
-            <span className="block h-full rounded-full bg-cyan-200" style={{ width: `${progress}%` }} />
+            <span className="block h-full rounded-full bg-amber-300 transition-all duration-500" style={{ width: `${progress}%` }} />
           </div>
         </div>
       </section>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-        <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <section className="rounded-xl border border-[#E0F9FA] bg-white p-4 shadow-sm">
           <h2 className="flex items-center gap-2 font-black text-slate-950">
-            <Award className="size-5 text-teal-700" />
+            <Award className="size-5 text-[#15508A]" />
             المستويات
           </h2>
           <div className="mt-4 grid gap-3">
             {passportLevels.map((level) => (
-              <div className="rounded-lg bg-slate-50 p-3" key={level.id}>
+              <div className="rounded-lg bg-[#F4FAFC] p-3" key={level.id}>
                 <div className="flex items-center justify-between gap-3">
                   <p className="font-black text-slate-950">{level.title}</p>
-                  <span className="text-xs font-bold text-teal-700">{level.minPoints} نقطة</span>
+                  <span className="text-xs font-bold text-[#15508A]">{level.minPoints} نقطة</span>
                 </div>
                 <p className="mt-1 text-sm leading-6 text-slate-600">{level.benefit}</p>
               </div>
@@ -65,25 +65,25 @@ export function PassportPage() {
         </section>
         <section className="grid gap-4">
           <div className="grid grid-cols-2 gap-3">
-            <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-              <QrCode className="size-5 text-teal-700" />
+            <article className="rounded-xl border border-[#E0F9FA] bg-white p-4 shadow-sm">
+              <QrCode className="size-5 text-[#15508A]" />
               <p className="mt-3 text-2xl font-black text-slate-950">{passport.scans.toLocaleString('ar-SA')}</p>
-              <p className="text-xs font-bold text-slate-500">عمليات Scan</p>
+              <p className="text-xs font-bold text-[#A09EA9]">عمليات Scan</p>
             </article>
-            <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-              <BadgeCheck className="size-5 text-teal-700" />
+            <article className="rounded-xl border border-[#E0F9FA] bg-white p-4 shadow-sm">
+              <BadgeCheck className="size-5 text-[#15508A]" />
               <p className="mt-3 text-2xl font-black text-slate-950">{passport.badges.length.toLocaleString('ar-SA')}</p>
-              <p className="text-xs font-bold text-slate-500">شارات نشطة</p>
+              <p className="text-xs font-bold text-[#A09EA9]">شارات نشطة</p>
             </article>
           </div>
-          <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="rounded-xl border border-[#E0F9FA] bg-white p-4 shadow-sm">
             <h2 className="flex items-center gap-2 font-black text-slate-950">
-              <Star className="size-5 text-teal-700" />
+              <Star className="size-5 text-amber-500" />
               الإنجازات
             </h2>
             <div className="mt-4 flex flex-wrap gap-2">
               {passport.achievements.map((achievement) => (
-                <span className="rounded-full bg-teal-50 px-3 py-2 text-xs font-bold text-teal-800" key={achievement}>
+                <span className="rounded-full border border-[#E0F9FA] bg-[#F4FAFC] px-3 py-2 text-xs font-bold text-[#15508A]" key={achievement}>
                   {achievement}
                 </span>
               ))}
