@@ -3,8 +3,8 @@ import { useLocation } from 'react-router-dom';
 import { syncQrScanToCentralCounter } from '../services/qrAnalyticsService';
 import { useAppStore } from '../store/appStore';
 
-function getHashQueryString(location: ReturnType<typeof useLocation>) {
-  const rawHash = window.location.hash || location.hash || '';
+function getHashQueryString(hash: string) {
+  const rawHash = window.location.hash || hash || '';
   const queryIndex = rawHash.indexOf('?');
   if (queryIndex < 0) {
     return '';
@@ -19,7 +19,7 @@ export function useQrTracking() {
   const recordQrLocationScan = useAppStore((state) => state.recordQrLocationScan);
 
   useEffect(() => {
-    const search = location.search || getHashQueryString(location);
+    const search = location.search || getHashQueryString(location.hash);
     const params = new URLSearchParams(search);
     const hasLocationQr = params.has('qr');
     const qr = params.get('qr') ?? params.get('source');

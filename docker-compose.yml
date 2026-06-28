@@ -1,0 +1,55 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: web
+    ports:
+      - "8080:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      DATABASE_URL: postgres://aser_user:aser_password@db:5432/aser_health
+      JWT_SECRET: ${JWT_SECRET:-change-this-local-jwt-secret}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@aseer.health.sa}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-change-me-local-only}
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "3001"
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3001/api/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 5
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: aser_health
+      POSTGRES_USER: aser_user
+      POSTGRES_PASSWORD: aser_password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aser_user -d aser_health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres-data:

@@ -4,7 +4,7 @@ export type DurationType = 'one-hour' | 'half-day' | 'full-day';
 export type CurrentLocation = 'abha' | 'soudah' | 'airport' | 'fog-walk';
 export type AgeGroup = 'under-18' | '18-35' | '36-59' | '60-plus' | '18-49' | '50-plus';
 export type VisitPurpose = 'activity' | 'family' | 'relax' | 'awareness' | 'urgent';
-export type ContentType = 'post' | 'card' | 'pdf';
+export type ContentType = 'post' | 'card' | 'pdf' | 'image';
 export type VisitorType = 'visitor' | 'resident';
 
 export interface JourneyAnswers {

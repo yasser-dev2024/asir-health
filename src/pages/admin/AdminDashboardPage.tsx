@@ -58,9 +58,16 @@ const emptyEventForm: EventPayload = {
 };
 
 const emptyContentForm: ContentPayload = {
-  title: '', type: 'post', summary: '',
-  category: '', actionLabel: 'عرض المادة',
+  title: '', type: 'pdf', summary: '',
+  category: '', actionLabel: 'تحميل الملف',
   fileUrl: '/downloads/hydration-guide.pdf',
+};
+
+const contentTypeLabels: Record<ContentType, string> = {
+  post: 'رابط توعوي',
+  card: 'بطاقة',
+  pdf: 'ملف PDF',
+  image: 'صورة',
 };
 
 function toKeywordPayload(form: KeywordFormState): KeywordPayload {
@@ -545,29 +552,33 @@ export function AdminDashboardPage() {
       </Section>
 
       {/* ── Content ── */}
-      <Section color="amber" desc="المواد التوعوية المرئية في صفحة المواد" icon={FileText} id="content" title="إدارة المحتوى التوعوي">
+      <Section color="amber" desc="إضافة ملفات PDF وصور وروابط توعوية تظهر في صفحة ملفات التحميل" icon={FileText} id="content" title="إدارة ملفات التحميل">
         <div className="grid gap-5 xl:grid-cols-[400px_1fr]">
           <FormCard editing={Boolean(ctEditId)} editingLabel={contents.find((c) => c.id === ctEditId)?.title} onCancel={() => { setCtEditId(null); setCtForm(emptyContentForm); setCtErr(''); }}>
             <form className="grid gap-4" onSubmit={onCtSubmit}>
-              <FInput label="عنوان المادة *" onChange={(v) => setCtForm((f) => ({ ...f, title: v }))} placeholder="دليل الترطيب في الصيف..." value={ctForm.title} />
-              <FSelect label="نوع المادة" onChange={(v) => setCtForm((f) => ({ ...f, type: v as ContentType }))} value={ctForm.type}>
-                <option value="post">منشور توعوي</option>
-                <option value="card">بطاقة توعوية</option>
+              <FInput label="عنوان الملف *" onChange={(v) => setCtForm((f) => ({ ...f, title: v }))} placeholder="دليل الترطيب في الصيف..." value={ctForm.title} />
+              <FSelect label="نوع ملف التحميل" onChange={(v) => setCtForm((f) => ({ ...f, type: v as ContentType, actionLabel: v === 'image' ? 'عرض الصورة' : v === 'pdf' ? 'تحميل PDF' : f.actionLabel }))} value={ctForm.type}>
                 <option value="pdf">ملف PDF</option>
+                <option value="image">صورة</option>
+                <option value="card">بطاقة توعوية</option>
+                <option value="post">رابط توعوي</option>
               </FSelect>
-              <FTextarea label="الملخص *" onChange={(v) => setCtForm((f) => ({ ...f, summary: v }))} placeholder="ملخص المادة..." rows={3} value={ctForm.summary} />
+              <FTextarea label="وصف يظهر تحت الملف *" onChange={(v) => setCtForm((f) => ({ ...f, summary: v }))} placeholder="اكتب شرحاً مختصراً لما يحتويه الملف وكيف يستفيد منه الزائر..." rows={3} value={ctForm.summary} />
               <div className="grid gap-3 sm:grid-cols-2">
                 <FInput label="التصنيف" onChange={(v) => setCtForm((f) => ({ ...f, category: v }))} placeholder="صحة، ترطيب..." value={ctForm.category} />
                 <FInput label="نص الزر" onChange={(v) => setCtForm((f) => ({ ...f, actionLabel: v }))} placeholder="عرض المادة" value={ctForm.actionLabel} />
               </div>
-              <FInput label="رابط الملف أو الصفحة" onChange={(v) => setCtForm((f) => ({ ...f, fileUrl: v }))} placeholder="/downloads/..." value={ctForm.fileUrl} />
+              <FInput label="رابط ملف PDF أو صورة" onChange={(v) => setCtForm((f) => ({ ...f, fileUrl: v }))} placeholder="/downloads/file.pdf أو https://..." value={ctForm.fileUrl} />
+              <p className="rounded-xl border border-[#E0F9FA] bg-[#F4FAFC] px-4 py-3 text-xs font-bold leading-6 text-[#057590]">
+                ارفع الملف داخل `public/downloads` أو استخدم رابط https آمن، ثم ضع المسار هنا. أمثلة: `/downloads/guide.pdf` أو `/downloads/poster.png`.
+              </p>
               {ctErr && <p className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{ctErr}</p>}
               <SaveBtn editing={Boolean(ctEditId)} />
             </form>
           </FormCard>
 
           <div className="grid gap-3 content-start">
-            <p className="text-xs font-black uppercase tracking-widest text-slate-400">{contents.length} مادة</p>
+            <p className="text-xs font-black uppercase tracking-widest text-slate-400">{contents.length} ملف قابل للتحميل</p>
             {contents.map((ct) => (
               <ItemCard
                 active={ct.active}
@@ -575,7 +586,7 @@ export function AdminDashboardPage() {
                 onDelete={() => confirmDelete(ct.title, () => deleteContent(ct.id))}
                 onEdit={() => { setCtEditId(ct.id); setCtForm(ct); document.getElementById('content')?.scrollIntoView({ behavior: 'smooth' }); }}
                 onToggle={() => { toggleContent(ct.id); toast.show(ct.active ? 'تم التعطيل' : 'تم التفعيل'); }}
-                sub={`${ct.category || '—'} · ${ct.type === 'post' ? 'منشور' : ct.type === 'card' ? 'بطاقة' : 'PDF'}`}
+                sub={`${ct.category || '—'} · ${contentTypeLabels[ct.type] ?? 'ملف'}`}
                 title={ct.title}
               />
             ))}

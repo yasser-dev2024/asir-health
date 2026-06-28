@@ -107,7 +107,6 @@ interface AppState {
   resetSmartEntry: () => void;
   setSmartEntryCompleted: () => void;
   updateSmartEntryConfig: (config: SmartEntryConfigPayload) => void;
-  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   refreshAdminSession: () => boolean;
 }
@@ -220,26 +219,6 @@ const QR_REPEAT_WINDOW_MS = 0;
 const STORE_VERSION = 3;
 const ADMIN_SESSION_KEY = 'saif-seha-admin-session';
 const ADMIN_JWT_KEY = 'admin-jwt-token';
-const ADMIN_LOGIN_ATTEMPTS_KEY = 'saif-seha-admin-login-attempts';
-const ADMIN_MAX_FAILED_ATTEMPTS = 5;
-
-// Local fallback credentials for static deployments (GitHub Pages) where the backend is unavailable.
-// These match the server defaults in server/auth.js.
-const LOCAL_ADMIN_EMAIL = 'admin@aseer.health.sa';
-const LOCAL_ADMIN_PASSWORD = 'Aseer@2026';
-
-function checkLocalAdminCredentials(email: string, password: string): boolean {
-  return (
-    String(email).toLowerCase().trim() === LOCAL_ADMIN_EMAIL &&
-    String(password) === LOCAL_ADMIN_PASSWORD
-  );
-}
-
-function createLocalAdminSession(): void {
-  const expiresAt = Date.now() + 8 * 60 * 60 * 1000; // 8 hours
-  window.sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ expiresAt }));
-}
-const ADMIN_LOCKOUT_MS = 5 * 60 * 1000;
 const SEEDED_METRICS_BASELINE: AdminMetrics = {
   visitors: 18420,
   qrScans: 6940,
@@ -267,11 +246,6 @@ const SEEDED_PASSPORT_SCANS = 3;
 const SEEDED_PASSPORT_ACHIEVEMENTS = new Set(['مسح QR من نقطة الوصول', 'زيارة ممشى صحي', 'قراءة بطاقة توعوية']);
 const SEEDED_PASSPORT_BADGES = new Set(['نشط اليوم', 'محافظ على الترطيب']);
 
-interface AdminLoginAttempts {
-  count: number;
-  lockedUntil: number;
-}
-
 function readAdminSessionExpiresAt(): number {
   try {
     const raw = window.sessionStorage.getItem(ADMIN_SESSION_KEY);
@@ -297,42 +271,6 @@ function hasValidAdminSession(): boolean {
 function clearAdminSession(): void {
   window.sessionStorage.removeItem(ADMIN_SESSION_KEY);
   window.sessionStorage.removeItem(ADMIN_JWT_KEY);
-}
-
-function readAdminLoginAttempts(): AdminLoginAttempts {
-  try {
-    const raw = window.localStorage.getItem(ADMIN_LOGIN_ATTEMPTS_KEY);
-    const parsed = raw ? (JSON.parse(raw) as Partial<AdminLoginAttempts>) : {};
-    const lockedUntil = Number(parsed.lockedUntil || 0);
-
-    if (lockedUntil && lockedUntil <= Date.now()) {
-      window.localStorage.removeItem(ADMIN_LOGIN_ATTEMPTS_KEY);
-      return { count: 0, lockedUntil: 0 };
-    }
-
-    return {
-      count: Math.max(0, Number(parsed.count || 0)),
-      lockedUntil,
-    };
-  } catch {
-    return { count: 0, lockedUntil: 0 };
-  }
-}
-
-function recordFailedAdminLogin(): void {
-  const attempts = readAdminLoginAttempts();
-  const count = attempts.count + 1;
-  const lockedUntil = count >= ADMIN_MAX_FAILED_ATTEMPTS ? Date.now() + ADMIN_LOCKOUT_MS : 0;
-  window.localStorage.setItem(ADMIN_LOGIN_ATTEMPTS_KEY, JSON.stringify({ count, lockedUntil }));
-}
-
-function clearFailedAdminLogins(): void {
-  window.localStorage.removeItem(ADMIN_LOGIN_ATTEMPTS_KEY);
-}
-
-export function getAdminLoginLockRemainingSeconds(): number {
-  const attempts = readAdminLoginAttempts();
-  return Math.max(0, Math.ceil((attempts.lockedUntil - Date.now()) / 1000));
 }
 
 function subtractBaseline(value: number | undefined, baseline: number): number {
@@ -966,7 +904,7 @@ export const useAppStore = create<AppState>()(
         // Decide which QR source to use for counting. If unknown, group under
         // 'QR_UNKNOWN' so that scans via arbitrary QR links (e.g. admin login QR)
         // are still counted rather than ignored.
-        let usedQrSource = isKnownQrSource(qrSource) ? qrSource : 'QR_UNKNOWN';
+        const usedQrSource = isKnownQrSource(qrSource) ? qrSource : 'QR_UNKNOWN';
         if (usedQrSource === 'QR_UNKNOWN') {
           logEvent('warn', 'qr_scan_unknown_recorded', { qrSource });
         }
@@ -1040,67 +978,6 @@ export const useAppStore = create<AppState>()(
         const cleaned = cleanSmartEntryConfig(config);
         set({ smartEntryConfig: cleaned });
         void upsertRemoteSmartEntryConfig(cleaned);
-      },
-      login: async (email, password) => {
-        if (getAdminLoginLockRemainingSeconds() > 0) {
-          set({ adminAuthenticated: false });
-          logEvent('warn', 'admin_login_locked');
-          return false;
-        }
-
-        try {
-          const res = await fetch('/api/admin/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: sanitizeText(email, 120), password }),
-          });
-
-          if (res.ok) {
-            const { token, expiresAt } = await res.json() as { token: string; expiresAt: number };
-            window.sessionStorage.setItem(ADMIN_JWT_KEY, token);
-            window.sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ expiresAt }));
-            clearFailedAdminLogins();
-            set({ adminAuthenticated: true });
-            logEvent('info', 'admin_login_success');
-            return true;
-          }
-
-          // 401 = wrong credentials (backend is up but rejected them)
-          if (res.status === 401) {
-            clearAdminSession();
-            recordFailedAdminLogin();
-            set({ adminAuthenticated: false });
-            logEvent('warn', 'admin_login_failed');
-            return false;
-          }
-
-          // Any other HTTP error (e.g. 404 on GitHub Pages — no backend) → try local fallback in development only
-          if (import.meta.env.DEV && checkLocalAdminCredentials(email, password)) {
-            createLocalAdminSession();
-            clearFailedAdminLogins();
-            set({ adminAuthenticated: true });
-            logEvent('info', 'admin_login_local');
-            return true;
-          }
-
-          clearAdminSession();
-          recordFailedAdminLogin();
-          set({ adminAuthenticated: false });
-          logEvent('warn', 'admin_login_failed');
-          return false;
-        } catch {
-          // Network error (offline / no backend) → try local fallback in development only
-          if (import.meta.env.DEV && checkLocalAdminCredentials(email, password)) {
-            createLocalAdminSession();
-            clearFailedAdminLogins();
-            set({ adminAuthenticated: true });
-            logEvent('info', 'admin_login_local');
-            return true;
-          }
-          clearAdminSession();
-          set({ adminAuthenticated: false });
-          return false;
-        }
       },
       logout: () => {
         clearAdminSession();

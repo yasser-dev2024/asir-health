@@ -1,4 +1,4 @@
-import { Award, Bot, Flame, Home, Route } from 'lucide-react';
+import { Award, Bot, FileDown, Flame, Home, Route } from 'lucide-react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { BrandLogo } from '../components/BrandLogo';
 import { FloatingNowButton } from '../components/FloatingNowButton';
@@ -9,6 +9,7 @@ import { useAppStore } from '../store/appStore';
 const allMobileNavItems = [
   { label: 'الرئيسية', to: '/', icon: Home, feature: null },
   { label: 'رحلتي', to: '/journey', icon: Route, feature: null },
+  { label: 'ملفات', to: '/downloads', icon: FileDown, feature: null },
   { label: 'بطل الصحة', to: '/hero', icon: Flame, feature: 'healthHero' as const },
   { label: 'الجواز', to: '/passport', icon: Award, feature: null },
   { label: 'مساعد', to: '/assistant', icon: Bot, feature: null },
@@ -21,7 +22,7 @@ const allDesktopNav = [
   { label: 'الجواز', to: '/passport', feature: null },
   { label: 'بطل الصحة', to: '/hero', feature: 'healthHero' as const },
   { label: 'الخطة', to: '/plan', feature: null },
-  { label: 'المواد', to: '/downloads', feature: null },
+  { label: 'ملفات تحميل', to: '/downloads', feature: null },
   { label: 'قريب مني', to: '/nearby', feature: null },
   { label: 'مساعد', to: '/assistant', feature: null },
 ];
@@ -44,7 +45,7 @@ export function ClientLayout() {
     ? [...mobileNavItems.slice(0, 2), ...mobileNavItems.slice(2)]
     : mobileNavItems;
 
-  const cols = mobileNavFinal.length <= 4 ? 'grid-cols-4' : 'grid-cols-5';
+  const cols = mobileNavFinal.length <= 4 ? 'grid-cols-4' : mobileNavFinal.length === 5 ? 'grid-cols-5' : 'grid-cols-6';
 
   return (
     <div className="min-h-dvh bg-[#F4FAFC] text-slate-900">

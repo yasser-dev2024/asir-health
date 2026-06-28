@@ -1,9 +1,34 @@
 import jwt from 'jsonwebtoken';
+import { timingSafeEqual } from 'crypto';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-in-production';
-const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'admin@aseer.health.sa').toLowerCase().trim();
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Aseer@2026';
+const IS_PROD = process.env.NODE_ENV === 'production';
+const DEV_ADMIN_EMAIL = 'admin@aseer.health.sa';
+const DEV_ADMIN_PASSWORD = 'change-me-local-only';
+const DEV_JWT_SECRET = 'local-development-jwt-secret-change-me';
+
+function envOrDev(name, devValue) {
+  const value = process.env[name]?.trim();
+  if (value) return value;
+  if (IS_PROD) {
+    throw new Error(`${name} is required in production`);
+  }
+  return devValue;
+}
+
+const JWT_SECRET = envOrDev('JWT_SECRET', DEV_JWT_SECRET);
+const ADMIN_EMAIL = envOrDev('ADMIN_EMAIL', DEV_ADMIN_EMAIL).toLowerCase().trim();
+const ADMIN_PASSWORD = envOrDev('ADMIN_PASSWORD', DEV_ADMIN_PASSWORD);
 const TOKEN_TTL = '8h';
+
+if (IS_PROD && JWT_SECRET.length < 32) {
+  throw new Error('JWT_SECRET must be at least 32 characters in production');
+}
+
+function safeEqual(left, right) {
+  const leftBuffer = Buffer.from(String(left));
+  const rightBuffer = Buffer.from(String(right));
+  return leftBuffer.length === rightBuffer.length && timingSafeEqual(leftBuffer, rightBuffer);
+}
 
 export function createAdminToken() {
   return jwt.sign({ role: 'admin' }, JWT_SECRET, { expiresIn: TOKEN_TTL });
@@ -29,7 +54,7 @@ export function requireAdmin(req, res, next) {
 
 export function checkCredentials(email, password) {
   return (
-    String(email).toLowerCase().trim() === ADMIN_EMAIL &&
-    String(password) === ADMIN_PASSWORD
+    safeEqual(String(email).toLowerCase().trim(), ADMIN_EMAIL) &&
+    safeEqual(String(password), ADMIN_PASSWORD)
   );
 }

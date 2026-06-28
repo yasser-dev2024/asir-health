@@ -21,6 +21,32 @@ npm run build
 npm run preview
 ```
 
+## التشغيل عبر Docker
+
+يبني Docker الواجهة باستخدام Node 20 Alpine ثم يشغل ملفات `dist` عبر Nginx على المنفذ `80` داخل الحاوية، مع فتح المنفذ `8080` على الجهاز.
+
+```bash
+docker compose up --build
+```
+
+ثم افتح:
+
+```text
+http://localhost:8080
+```
+
+لإيقاف الحاويات:
+
+```bash
+docker compose down
+```
+
+لإعادة البناء بعد أي تعديل:
+
+```bash
+docker compose up --build --force-recreate
+```
+
 ## بيانات لوحة التحكم
 
 المسار:
@@ -29,12 +55,15 @@ npm run preview
 /admin/login
 ```
 
-بيانات الدخول التجريبية:
+في التشغيل المحلي أو نشر الخادم، اضبط بيانات الدخول عبر متغيرات البيئة:
 
 ```text
-admin@aseer.health.sa
-Aseer@2026
+ADMIN_EMAIL
+ADMIN_PASSWORD
+JWT_SECRET
 ```
+
+لا تستخدم بيانات افتراضية في الإنتاج. عند الحاجة لتجربة static demo فقط، فعّل `VITE_ENABLE_LOCAL_ADMIN_FALLBACK=true` واضبط `VITE_ADMIN_EMAIL` و`VITE_ADMIN_PASSWORD` في ملف `.env.local`.
 
 ## المسارات
 

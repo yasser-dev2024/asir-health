@@ -7,12 +7,15 @@ const optionalSafeUrl = z
   .max(250)
   .refine((value) => !value || Boolean(safeUrl(value)), 'الرابط يجب أن يكون داخليًا أو يبدأ بـ https فقط.');
 
-const requiredSafeUrl = z
+const requiredDownloadUrl = z
   .string()
   .trim()
-  .min(1, 'أضف رابطًا صحيحًا.')
-  .max(250)
-  .refine((value) => Boolean(safeUrl(value)), 'الرابط يجب أن يكون داخليًا أو يبدأ بـ https فقط.');
+  .min(1, 'أضف رابط ملف صحيحًا.')
+  .max(500)
+  .refine(
+    (value) => Boolean(safeUrl(value, { allowRelative: true, allowedProtocols: ['https:'] })),
+    'رابط الملف يجب أن يكون داخليًا مثل /downloads/file.pdf أو يبدأ بـ https فقط.'
+  );
 
 const requiredHttpsUrl = z
   .string()
@@ -48,11 +51,11 @@ export const eventSchema = z.object({
 
 export const contentSchema = z.object({
   title: z.string().trim().min(3, 'اكتب عنوان المادة.').max(90),
-  type: z.enum(['post', 'card', 'pdf']),
+  type: z.enum(['post', 'card', 'pdf', 'image']),
   summary: z.string().trim().min(12, 'اكتب ملخصاً مناسباً.').max(420),
   category: z.string().trim().min(3, 'حدد التصنيف.').max(50),
   actionLabel: z.string().trim().min(3, 'اكتب اسم الزر.').max(40),
-  fileUrl: requiredSafeUrl,
+  fileUrl: requiredDownloadUrl,
 });
 
 export const doctorAssistantSchema = z.object({

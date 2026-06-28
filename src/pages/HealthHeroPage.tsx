@@ -1,7 +1,6 @@
 import { Award, CheckCircle, ChevronLeft, Flame, Phone, Share2, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { BrandLogo } from '../components/BrandLogo';
-import { Button } from '../components/ui/Button';
 import { useAppStore } from '../store/appStore';
 
 interface QuizQuestion {
@@ -85,9 +84,12 @@ export function HealthHeroPage() {
   const addHeroEntry = useAppStore((s) => s.addHeroEntry);
 
   const totalPoints = questions.length * 15;
-  const score = answers.reduce<number>((acc, ans, i) => acc + (ans === questions[i].correctIndex ? 15 : 0), 0);
+  const score = answers.reduce<number>((acc, ans, i) => {
+    const question = questions[i];
+    return acc + (question && ans === question.correctIndex ? 15 : 0);
+  }, 0);
   const badge = getBadge(score, totalPoints);
-  const q = questions[currentQ];
+  const q = questions[currentQ] ?? questions[0]!;
   const answered = selected !== null;
   const isCorrect = answered && selected === q.correctIndex;
 

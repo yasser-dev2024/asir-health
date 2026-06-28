@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react';
 import { HashRouter } from 'react-router-dom';
-import { RemoteDataProvider } from './components/RemoteDataProvider';
 import { SmartHealthEntry } from './components/SmartHealthEntry';
 import { SplashScreen } from './components/SplashScreen';
 import { AppRoutes } from './routes/AppRoutes';
@@ -30,13 +29,13 @@ function App() {
   }, [setSplashSeen]);
 
   return (
-    <RemoteDataProvider>
+    <>
       <SplashScreen autoClose={!forceSplash} onDone={completeSplash} visible={splashVisible} />
       <HashRouter>
         <AppRoutes />
         <SmartHealthEntry force={forceEntry} onDone={() => setSmartEntryDone(true)} visible={smartEntryVisible} />
       </HashRouter>
-    </RemoteDataProvider>
+    </>
   );
 }
 

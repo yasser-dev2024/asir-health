@@ -1,4 +1,4 @@
-import { BookmarkCheck, CalendarCheck, HeartPulse, Map, MapPin, Route, ShieldPlus } from 'lucide-react';
+import { BookmarkCheck, CalendarCheck, HeartPulse, Map, Route, ShieldPlus } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { PageHeader } from '../components/ui/PageHeader';
 import { buildDailyPlan } from '../services/planService';
