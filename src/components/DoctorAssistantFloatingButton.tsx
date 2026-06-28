@@ -5,7 +5,7 @@ export function DoctorAssistantFloatingButton() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  if (location.pathname.startsWith('/admin') || location.pathname === '/assistant') {
+  if (location.pathname.startsWith('/admin') || location.pathname === '/assistant' || location.pathname === '/hero') {
     return null;
   }
 

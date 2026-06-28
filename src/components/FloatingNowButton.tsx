@@ -14,7 +14,7 @@ export function FloatingNowButton() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
 
-  if (location.pathname === '/') {
+  if (location.pathname === '/' || location.pathname === '/hero') {
     return null;
   }
 

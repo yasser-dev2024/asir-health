@@ -30,6 +30,7 @@ const ANCHOR_SECTIONS = [
   { label: 'البداية الذكية', id: 'smart-entry',      icon: Activity     },
   { label: 'تقارير QR',      id: 'qr',               icon: QrCode       },
   { label: 'التحكم بالميزات', id: 'features',        icon: Settings     },
+  { label: 'متسابقو بطل الصحة', id: 'hero-entries', icon: Flame        },
 ] as const;
 
 const ROUTE_SECTIONS = [

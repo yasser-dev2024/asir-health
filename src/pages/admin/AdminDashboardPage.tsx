@@ -10,6 +10,7 @@ import {
   FileText,
   Flame,
   Map,
+  Phone,
   Plus,
   QrCode,
   Save,
@@ -317,6 +318,8 @@ export function AdminDashboardPage() {
   const addPassportPoints = useAppStore((s) => s.addPassportPoints);
   const featuresEnabled = useAppStore((s) => s.featuresEnabled);
   const toggleFeature = useAppStore((s) => s.toggleFeature);
+  const heroEntries = useAppStore((s) => s.heroEntries);
+  const deleteHeroEntry = useAppStore((s) => s.deleteHeroEntry);
 
   // Forms
   const [kwForm, setKwForm] = useState<KeywordFormState>(emptyKeywordForm);
@@ -709,6 +712,73 @@ export function AdminDashboardPage() {
             );
           })}
         </div>
+      </Section>
+
+      {/* ── Hero Entries ── */}
+      <Section color="amber" desc="أرقام المتسابقين الذين شاركوا نتائجهم عبر واتساب" icon={Flame} id="hero-entries" title="متسابقو بطل الصحة">
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex items-center gap-2 rounded-xl bg-amber-50 px-4 py-2.5">
+            <Users className="size-4 text-amber-700" />
+            <span className="text-sm font-black text-amber-800">{heroEntries.length} متسابق</span>
+          </div>
+          {heroEntries.length > 0 && (
+            <p className="text-xs text-slate-400">يمكنك التواصل مع المتسابقين عبر واتساب لتحفيزهم</p>
+          )}
+        </div>
+        {heroEntries.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
+            <Flame className="mx-auto size-10 text-slate-300 mb-3" />
+            <p className="text-sm font-bold text-slate-400">لا يوجد متسابقون بعد</p>
+            <p className="text-xs text-slate-300 mt-1">ستظهر أرقام المتسابقين هنا عند مشاركة نتائجهم</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto rounded-2xl border border-slate-100">
+            <table className="min-w-full text-right text-sm">
+              <thead className="bg-slate-50">
+                <tr>
+                  {['رقم الجوال', 'النقاط', 'اللقب', 'التاريخ', ''].map((h) => (
+                    <th className="px-4 py-3 text-[11px] font-black uppercase tracking-wide text-slate-500" key={h}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50 bg-white">
+                {heroEntries.map((entry) => (
+                  <tr className="hover:bg-slate-50 transition" key={entry.id}>
+                    <td className="px-4 py-3">
+                      <a
+                        className="flex items-center gap-2 font-black text-[#16910D] hover:underline"
+                        href={`https://wa.me/966${entry.phone.replace(/^0/, '')}`}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        <Phone className="size-3.5" />
+                        {entry.phone}
+                      </a>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-black text-amber-700">
+                        {entry.score} نقطة
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 font-bold text-slate-700">{entry.badge}</td>
+                    <td className="px-4 py-3 text-xs text-slate-400">
+                      {new Date(entry.timestamp).toLocaleString('ar-SA')}
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        className="rounded-lg bg-rose-50 p-1.5 text-rose-500 hover:bg-rose-100 transition"
+                        onClick={() => { deleteHeroEntry(entry.id); toast.show('تم الحذف ✓'); }}
+                        type="button"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Section>
 
       <SaveToast message={toast.msg} />

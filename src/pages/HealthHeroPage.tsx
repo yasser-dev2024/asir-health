@@ -1,7 +1,8 @@
-import { Award, CheckCircle, ChevronLeft, Flame, Share2, XCircle } from 'lucide-react';
+import { Award, CheckCircle, ChevronLeft, Flame, Phone, Share2, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { BrandLogo } from '../components/BrandLogo';
 import { Button } from '../components/ui/Button';
+import { useAppStore } from '../store/appStore';
 
 interface QuizQuestion {
   id: number;
@@ -80,6 +81,8 @@ export function HealthHeroPage() {
   const [answers, setAnswers] = useState<(number | null)[]>(Array(questions.length).fill(null));
   const [phone, setPhone] = useState('');
   const [shareError, setShareError] = useState('');
+  const [sent, setSent] = useState(false);
+  const addHeroEntry = useAppStore((s) => s.addHeroEntry);
 
   const totalPoints = questions.length * 15;
   const score = answers.reduce<number>((acc, ans, i) => acc + (ans === questions[i].correctIndex ? 15 : 0), 0);
@@ -127,12 +130,15 @@ export function HealthHeroPage() {
     }
     const intl = digits.startsWith('966') ? digits : digits.startsWith('05') ? `966${digits.slice(1)}` : `966${digits}`;
     const text = encodeURIComponent(
-      `🏆 حصلت على ${score} من ${totalPoints} نقطة في تحدي "بطل الصحة في عسير"\n` +
-      `${badge.emoji} اللقب: ${badge.title}\n\n` +
-      `هل يمكنك التفوق عليّ؟\n` +
-      `جرّب التحدي: https://yasser-dev2024.github.io/asir-health/`
+      `🏆 مبارك! لقد حصلت على ${score} من ${totalPoints} نقطة في تحدي "بطل الصحة في عسير"\n` +
+      `${badge.emoji} لقبك: ${badge.title}\n\n` +
+      `💪 استمر في الرياضة والنشاط الصحي، أنت قدوة في منطقة عسير!\n` +
+      `🌿 تذكر: الصحة كنز، والنشاط في طبيعة عسير متعة لا تُقدّر.\n\n` +
+      `هل تتحدّى أصدقاءك؟ جرّب التحدي: https://yasser-dev2024.github.io/asir-health/#/hero`
     );
     window.open(`https://wa.me/${intl}?text=${text}`, '_blank');
+    addHeroEntry({ phone: `0${intl.slice(3)}`, score, badge: badge.title });
+    setSent(true);
     setShareError('');
   }
 
@@ -316,30 +322,43 @@ export function HealthHeroPage() {
 
         {/* WhatsApp share */}
         <div className="px-5 py-5">
-          <p className="mb-3 text-sm font-black text-[#283A83]">شارك نتيجتك عبر واتساب</p>
-          <div className="flex gap-2 mb-2">
-            <input
-              className="flex-1 rounded-xl border-2 border-[#E0F9FA] bg-[#F4FAFC] px-4 py-3 text-right text-sm font-bold text-slate-800 outline-none focus:border-[#15508A] transition"
-              dir="ltr"
-              onChange={(e) => { setPhone(e.target.value); setShareError(''); }}
-              placeholder="05xxxxxxxx"
-              type="tel"
-              value={phone}
-            />
-            <button
-              className="rounded-xl bg-[#16910D] px-4 py-3 text-sm font-black text-white shadow-md hover:bg-green-700 transition active:scale-95"
-              onClick={handleWhatsApp}
-              type="button"
-            >
-              <Share2 className="size-5" />
-            </button>
-          </div>
-          {shareError && <p className="text-xs font-bold text-red-500 mb-2">{shareError}</p>}
+          <p className="mb-1 text-sm font-black text-[#283A83]">شارك نتيجتك عبر واتساب</p>
+          <p className="mb-3 text-xs text-[#A09EA9]">أدخل رقم جوالك لإرسال رسالة تحفيز لك ولأصدقائك</p>
+          {sent ? (
+            <div className="mb-3 rounded-xl border-2 border-[#16910D] bg-green-50 p-4 text-center">
+              <CheckCircle className="mx-auto size-8 text-[#16910D] mb-2" />
+              <p className="text-sm font-black text-[#16910D]">تم الإرسال بنجاح!</p>
+              <p className="text-xs text-[#16910D]/70 mt-1">سيتواصل معك فريق تجمع عسير الصحي قريباً</p>
+            </div>
+          ) : (
+            <>
+              <div className="flex gap-2 mb-2">
+                <input
+                  className="flex-1 rounded-xl border-2 border-[#E0F9FA] bg-[#F4FAFC] px-4 py-3 text-right text-sm font-bold text-slate-800 outline-none focus:border-[#15508A] transition"
+                  dir="ltr"
+                  onChange={(e) => { setPhone(e.target.value); setShareError(''); }}
+                  placeholder="05xxxxxxxx"
+                  type="tel"
+                  value={phone}
+                />
+                <button
+                  className="flex items-center gap-2 rounded-xl bg-[#16910D] px-4 py-3 text-sm font-black text-white shadow-md hover:bg-green-700 transition active:scale-95"
+                  onClick={handleWhatsApp}
+                  type="button"
+                >
+                  <Phone className="size-4" />
+                  إرسال
+                </button>
+              </div>
+              {shareError && <p className="text-xs font-bold text-red-500 mb-2">{shareError}</p>}
+            </>
+          )}
           <button
             className="w-full rounded-xl border-2 border-[#E0F9FA] bg-[#F4FAFC] py-3 text-sm font-bold text-[#15508A] hover:bg-[#E0F9FA] transition mb-3"
             onClick={handleShareGeneral}
             type="button"
           >
+            <Share2 className="inline-block ml-2 size-4" />
             مشاركة مع أي شخص عبر واتساب
           </button>
 

@@ -72,6 +72,9 @@ interface AppState {
   splashSeen: boolean;
   featuresEnabled: { healthHero: boolean; map: boolean };
   toggleFeature: (feature: 'healthHero' | 'map') => void;
+  heroEntries: Array<{ id: string; phone: string; score: number; badge: string; timestamp: string }>;
+  addHeroEntry: (entry: { phone: string; score: number; badge: string }) => void;
+  deleteHeroEntry: (id: string) => void;
   setSplashSeen: () => void;
   setJourneyAnswers: (answers: JourneyAnswers) => void;
   savePlan: () => void;
@@ -514,6 +517,16 @@ export const useAppStore = create<AppState>()(
             [feature]: !state.featuresEnabled[feature],
           },
         })),
+      heroEntries: [],
+      addHeroEntry: (entry) =>
+        set((state) => ({
+          heroEntries: [
+            { ...entry, id: createId('hero'), timestamp: new Date().toISOString() },
+            ...state.heroEntries,
+          ].slice(0, 500),
+        })),
+      deleteHeroEntry: (id) =>
+        set((state) => ({ heroEntries: state.heroEntries.filter((e) => e.id !== id) })),
       setSplashSeen: () => set({ splashSeen: true }),
       setJourneyAnswers: (answers) => {
         logEvent('info', 'journey_created', { answers });
@@ -1143,6 +1156,7 @@ export const useAppStore = create<AppState>()(
         savedPlan: state.savedPlan,
         splashSeen: state.splashSeen,
         featuresEnabled: state.featuresEnabled,
+        heroEntries: state.heroEntries,
       }),
     }
   )

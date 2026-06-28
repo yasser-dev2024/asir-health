@@ -1,5 +1,5 @@
-// v17 — اضافات جديدة1
-const CACHE_NAME = 'saif-seha-musaed-v17';
+// v18 — اصلاحات وتحسينات
+const CACHE_NAME = 'saif-seha-musaed-v18';
 
 // Only truly static binary assets worth caching
 const STATIC_ASSETS = [

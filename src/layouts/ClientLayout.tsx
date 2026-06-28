@@ -49,7 +49,7 @@ export function ClientLayout() {
   return (
     <div className="min-h-dvh bg-[#F4FAFC] text-slate-900">
       <header className="sticky top-0 z-20 border-b border-[#E0F9FA] bg-white/96 shadow-sm shadow-[#15508A]/6 backdrop-blur">
-        <div className="mx-auto flex h-20 w-full max-w-6xl items-center justify-between px-4">
+        <div className="mx-auto flex h-20 w-full max-w-6xl items-center justify-center px-4 sm:justify-between">
           <NavLink className="flex min-w-0 items-center gap-3" to="/">
             <span className="grid h-16 w-36 shrink-0 place-items-center rounded-xl border border-[#E0F9FA] bg-white px-2 shadow-md shadow-[#15508A]/8">
               <BrandLogo className="h-14 w-32" />
@@ -77,7 +77,7 @@ export function ClientLayout() {
           </nav>
         </div>
       </header>
-      <main className={home ? 'w-full pb-28 sm:pb-10' : 'mx-auto w-full max-w-6xl px-4 pb-28 sm:pb-10'}>
+      <main className={home ? 'w-full pb-36 sm:pb-10' : 'mx-auto w-full max-w-6xl px-4 pb-36 sm:pb-10'}>
         <Outlet />
       </main>
       <FloatingNowButton />
