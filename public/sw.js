@@ -1,5 +1,5 @@
-// v16 — fix base path for GitHub Pages deployment
-const CACHE_NAME = 'saif-seha-musaed-v16';
+// v17 — اضافات جديدة1
+const CACHE_NAME = 'saif-seha-musaed-v17';
 
 // Only truly static binary assets worth caching
 const STATIC_ASSETS = [
