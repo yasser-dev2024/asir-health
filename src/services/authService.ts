@@ -19,7 +19,13 @@ interface AdminLoginAttempts {
 }
 
 function isLocalFallbackAllowed(): boolean {
-  return ENABLE_LOCAL_ADMIN_FALLBACK || import.meta.env.DEV;
+  // Allow fallback in dev mode, when explicitly enabled via env,
+  // or on static hosting (GitHub Pages / any *.github.io domain) where no backend exists.
+  return (
+    import.meta.env.DEV ||
+    ENABLE_LOCAL_ADMIN_FALLBACK ||
+    window.location.hostname.endsWith('.github.io')
+  );
 }
 
 /**
@@ -208,8 +214,8 @@ export async function login(rawEmail: string, rawPassword: string): Promise<{
     }
 
     // Fallback: use local credentials only when allowed
-    const FALLBACK_ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || (import.meta.env.DEV ? 'admin@aseer.health.sa' : '')).toLowerCase().trim();
-    const FALLBACK_ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || (import.meta.env.DEV ? 'Aseer@2026' : '');
+    const FALLBACK_ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || 'admin@aseer.health.sa').toLowerCase().trim();
+    const FALLBACK_ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'Aseer@2026';
 
     if (isLocalFallbackAllowed() && email === FALLBACK_ADMIN_EMAIL && password === FALLBACK_ADMIN_PASSWORD) {
       createLocalSession();
