@@ -1,5 +1,5 @@
-// v15 — HashRouter migration: bust all old caches
-const CACHE_NAME = 'saif-seha-musaed-v15';
+// v16 — fix base path for GitHub Pages deployment
+const CACHE_NAME = 'saif-seha-musaed-v16';
 
 // Only truly static binary assets worth caching
 const STATIC_ASSETS = [
