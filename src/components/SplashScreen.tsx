@@ -1,6 +1,6 @@
 import { Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import asirSplashView from '../assets/asir-splash-view.png';
+import asirHeritageSplash from '../assets/asir-heritage-splash.png';
 import { BrandLogo } from './BrandLogo';
 import { Button } from './ui/Button';
 
@@ -12,18 +12,25 @@ interface SplashScreenProps {
 
 export function SplashScreen({ visible, onDone, autoClose = true }: SplashScreenProps) {
   const [leaving, setLeaving] = useState(false);
+  const [entranceDone, setEntranceDone] = useState(false);
 
   useEffect(() => {
     if (!visible || !autoClose) {
       return;
     }
 
+    // drop will-change after entrance animation finishes to free GPU layer
+    const entranceTimer = window.setTimeout(() => setEntranceDone(true), 1050);
+
     const timer = window.setTimeout(() => {
       setLeaving(true);
       window.setTimeout(onDone, 360);
     }, 4000);
 
-    return () => window.clearTimeout(timer);
+    return () => {
+      window.clearTimeout(entranceTimer);
+      window.clearTimeout(timer);
+    };
   }, [autoClose, onDone, visible]);
 
   if (!visible) {
@@ -37,55 +44,32 @@ export function SplashScreen({ visible, onDone, autoClose = true }: SplashScreen
 
   return (
     <div
-      className={`fixed inset-0 z-50 h-dvh overflow-hidden bg-[#283A83] text-white transition-opacity duration-500 ${
+      className={`fixed inset-0 z-50 h-dvh overflow-hidden transition-opacity duration-300 ${
         leaving ? 'opacity-0' : 'opacity-100'
       }`}
+      style={{ background: 'linear-gradient(158deg, #1c2d6e 0%, #283A83 45%, #15508A 100%)' }}
     >
+      {/* Background image — semi-transparent so the dark blue shows through */}
       <img
-        alt="منظر مبهج من عسير"
-        className="splash-scene-zoom splash-image fixed inset-0 h-dvh w-full object-cover object-center"
-        src={asirSplashView}
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 h-dvh w-full select-none object-cover object-center opacity-40"
+        draggable={false}
+        src={asirHeritageSplash}
       />
-      <div className="splash-backdrop fixed inset-0" />
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_10%,rgba(244,250,252,0.34),transparent_28%),linear-gradient(180deg,rgba(47,169,224,0.16),rgba(21,80,138,0.24)_58%,rgba(40,58,131,0.64))]" />
-
-      <span className="splash-sun-ring" />
-      <span className="splash-heritage-ribbon splash-heritage-ribbon-top" />
-      <span className="splash-heritage-ribbon splash-heritage-ribbon-bottom" />
-      <span className="splash-leaf splash-leaf-one">◆</span>
-      <span className="splash-leaf splash-leaf-two">✦</span>
-      <span className="splash-leaf splash-leaf-three">●</span>
-      <span className="splash-thread splash-thread-one" />
-      <span className="splash-thread splash-thread-two" />
-      <span className="splash-thread splash-thread-three" />
-      <span className="splash-thread splash-thread-four" />
-      <span className="splash-orbit splash-orbit-one" />
-      <span className="splash-orbit splash-orbit-two" />
-      <span className="splash-gold-dot splash-gold-dot-one" />
-      <span className="splash-gold-dot splash-gold-dot-two" />
-      <span className="splash-gold-dot splash-gold-dot-three" />
-      <span className="splash-particle splash-particle-one" />
-      <span className="splash-particle splash-particle-two" />
-      <span className="splash-particle splash-particle-three" />
-      <span className="splash-particle splash-particle-four" />
-      <span className="splash-particle splash-particle-five" />
-      <span className="splash-glint splash-glint-one" />
-      <span className="splash-glint splash-glint-two" />
-      <span className="splash-glint splash-glint-three" />
+      {/* Gradient overlay to keep logo and text readable */}
+      <div className="fixed inset-0 bg-[linear-gradient(180deg,rgba(28,45,110,0.52)_0%,rgba(40,58,131,0.38)_40%,rgba(21,80,138,0.62)_100%)]" />
 
       <div className="relative grid h-dvh place-items-center px-5 pb-[calc(env(safe-area-inset-bottom)+2rem)] pt-[calc(env(safe-area-inset-top)+2rem)]">
         <div className="splash-clear-panel w-full max-w-lg text-center">
-          <div className="splash-brand-entrance splash-logo-stage relative mx-auto mb-3 grid h-40 w-[min(88vw,28rem)] place-items-center sm:h-64">
-            <span className="splash-logo-ray splash-logo-ray-one" />
-            <span className="splash-logo-ray splash-logo-ray-two" />
-            <span className="splash-logo-ray splash-logo-ray-three" />
-            <span className="splash-logo-halo splash-logo-halo-one" />
-            <span className="splash-logo-halo splash-logo-halo-two" />
-            <span className="splash-pulse absolute h-32 w-64 rounded-full border border-white/60 sm:h-40 sm:w-80" />
-            <span className="splash-logo-shine" />
+          <div
+            className={`splash-brand-entrance splash-logo-stage relative mx-auto mb-3 grid h-40 w-[min(88vw,28rem)] place-items-center sm:h-64${
+              entranceDone ? ' splash-entrance-done' : ''
+            }`}
+          >
+            <span className="splash-logo-pulse" />
             <BrandLogo
               className="splash-logo-mark relative z-10 h-36 w-64 sm:h-56 sm:w-80"
-              imageClassName="drop-shadow-[0_16px_38px_rgba(2,6,23,0.78)]"
               tone="asir-white"
             />
           </div>
